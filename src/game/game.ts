@@ -1,18 +1,13 @@
-import {Observable, Subject} from 'rxjs';
+import {GameStore} from './game_store.ts';
 
 export class Game {
-  private activePlayer: number = 1;
+  private store = new GameStore();
 
-  changed: Subject<void> = new Subject<void>();
-
-  setActivePlayer(i: number) {
-    this.activePlayer = i;
-    this.changed.next();
+  state() {
+    return this.store.state();
   }
 
-  getState() {
-    return {
-      activePlayer: this.activePlayer,
-    };
+  increment() {
+    this.store.increment();
   }
 }

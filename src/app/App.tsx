@@ -2,21 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Game } from '../game/game';
 import './App.css';
 
-let i = 0;
 
 function App() {
 
   const [game] = useState(() => new Game());
-  const [gameState, setGameState] = useState(game.getState());
+  const [gameState, setGameState] = useState(game.state().snapshot());
 
   useEffect(() => {
-    game.changed.subscribe(() => {
-      setGameState(game.getState());
-    });
+    game.state().select().subscribe(val => {
+      setGameState(val);
+    })
   }, [game]);
 
   function updatePlayer() {
-    game.setActivePlayer(i++);
+    game.increment();
   }
 
   return (
