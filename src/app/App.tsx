@@ -1,29 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Game } from '../game/game';
+import {useDispatch, useSelector} from 'react-redux';
+import {gameSlice} from '../game/game_store.ts';
 import './App.css';
-
+import {selectAll} from './store';
 
 function App() {
+  const allState = useSelector(selectAll);
+  const dispatch = useDispatch();
 
-  const [game] = useState(() => new Game());
-  const [gameState, setGameState] = useState(game.state().snapshot());
-
-  useEffect(() => {
-    game.state().select().subscribe(val => {
-      setGameState(val);
-    })
-  }, [game]);
-
-  function updatePlayer() {
-    game.increment();
+  function increment() {
+    dispatch(gameSlice.actions.increment());
   }
 
   return (
     <div className="App">
-      <button onClick={updatePlayer}>Increment</button>
-      <pre>
-        {JSON.stringify(gameState, null, 2)}
-      </pre>
+      <button onClick={increment}>Increment</button>
+      <pre>{JSON.stringify(allState, null, 2)}</pre>
     </div>
   );
 }

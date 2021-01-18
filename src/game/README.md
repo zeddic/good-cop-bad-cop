@@ -1,1 +1,0 @@
-The folder is intentend to contain the game logic with no dependencies on the frontend rendering framework.
