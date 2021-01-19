@@ -6,6 +6,7 @@ import {
   IntegrityCardType,
   Player,
   TurnDirection,
+  TurnStage,
 } from './models';
 
 export function setupGame(numPlayers: number): GameState {
@@ -15,6 +16,11 @@ export function setupGame(numPlayers: number): GameState {
     equipment: [],
     turnDirection: TurnDirection.CLOCKWISE,
     stage: GameStage.PLAYING,
+    turn: {
+      activePlayer: 1,
+      actionsLeft: 1,
+      stage: TurnStage.TAKE_ACTION,
+    },
   };
 }
 
@@ -41,8 +47,9 @@ function createPlayers(numPlayers: number) {
       name: `Player ${i}`,
       integrityCards: assignments[i],
       equipment: [],
-      wounds: 0,
       gun: undefined,
+      wounds: 0,
+      dead: false,
     });
   }
 

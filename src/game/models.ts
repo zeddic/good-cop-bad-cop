@@ -1,6 +1,6 @@
 export interface GameState {
   players: Player[];
-  turn?: Turn;
+  turn: Turn;
   gunsRemaining: number;
   equipment: EquipmentCard[];
   turnDirection: TurnDirection;
@@ -17,6 +17,7 @@ export interface Turn {
   activePlayer: number;
   stage: TurnStage;
   actionsLeft: number;
+  pendingGunShot?: {target: number};
 }
 
 export enum TurnDirection {
@@ -38,6 +39,7 @@ export interface Player {
   equipment: EquipmentCard[];
   wounds: number;
   gun?: Gun;
+  dead: boolean;
 }
 
 export interface Gun {

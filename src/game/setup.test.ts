@@ -1,7 +1,4 @@
-import {
-  buildIntegrityDeck,
-  getIntegrityCardAssignments,
-} from './game_functions';
+import {buildIntegrityDeck, getIntegrityCardAssignments} from './setup';
 import {IntegrityCardType} from './models';
 
 describe('integrity cards', () => {
