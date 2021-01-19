@@ -10,8 +10,9 @@ import {
 /**
  * Causes the current player to pickup a gun, if available.
  */
-export function pickupGun(state: GameState) {
-  const player = getCurrentPlayer(state);
+export function pickupGun(state: GameState, options: {player?: number} = {}) {
+  const player = getPlayerOrCurrent(state, options.player);
+
   if (!player) return;
   if (player.gun) return;
   if (state.gunsRemaining <= 0) return;
@@ -23,41 +24,68 @@ export function pickupGun(state: GameState) {
   };
 }
 
-export function aimGun(state: GameState, targetId: number) {
-  const player = getCurrentPlayer(state);
-  const target = getPlayer(state, targetId);
+/**
+ * Aims the given players gun at the target.
+ * If no player is given, defaults to the current player.
+ * Does nothing if the player has no gun.
+ */
+export function aimGun(
+  state: GameState,
+  options: {player?: number; target: number}
+) {
+  const player = getPlayerOrCurrent(state, options.player);
+  const target = getPlayer(state, options.target);
 
   if (!player) {
-    console.warn('No active player');
+    console.log('No active player');
     return;
   }
 
   if (!target) {
-    console.warn(`${targetId} is not a valid player to aim at`);
+    console.log(`${options.target} is not a valid player to aim at`);
     return;
   }
 
   if (!player.gun) {
-    console.warn(`Player does not have a gun to aim.`);
+    console.log(`Player does not have a gun to aim.`);
     return;
   }
 
-  player.gun.aimedAt = targetId;
+  player.gun.aimedAt = options.target;
 }
 
 /**
- * Starts a gun shot at the player with the given id.
- * At some later point, the gun shot should be resolved using
- * `resolveGunShot` after players have had an opportunity to react
- * with equipemnt cards.
+ * Fires the given players gun at their current target.
+ * Does nothing if the player has no gun, or if they haven't aimed at.
+ * If no player is specified, defaults to the current player.
+ *
+ * Note that the shot will not be resolved until {@code resolveGunShot}
+ * is called. This gives us time to show the in-progress shot in the
+ * UI and players to play equipment cards.
  */
-export function startGunShot(state: GameState, targetId: number) {
-  const player = getCurrentPlayer(state);
-  const target = getPlayer(state, targetId);
-  if (!player || !target) return;
-  if (!player.gun || target.dead) return;
+export function fireGun(state: GameState, options: {player?: number} = {}) {
+  const player = getPlayerOrCurrent(state, options.player);
+  if (!player) return;
 
-  state.turn.pendingGunShot = {target: targetId};
+  if (!player.gun) {
+    console.log(`Player ${player.id} is not holding a gun to fire.`);
+    return;
+  } else if (player.gun.aimedAt === undefined) {
+    console.log(`Player ${player.id} has not aimed gun yet`);
+    return;
+  }
+
+  const target = getPlayer(state, player.gun.aimedAt);
+
+  if (!target) {
+    console.log(`Cannot fire gun at invalid target ${player.gun.aimedAt}`);
+    return;
+  } else if (target.dead) {
+    console.log('Target player is already dead');
+    return;
+  }
+
+  state.turn.pendingGunShot = {target: target.id};
   state.turn.stage = TurnStage.GUN_FIRING;
 }
 
@@ -116,6 +144,14 @@ export function endTurn(state: GameState) {
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
   };
+}
+
+/**
+ * If id is defined, returns a player with that id. If no id is defined,
+ * gets the players whose turn is currently active.
+ */
+export function getPlayerOrCurrent(state: GameState, id?: number) {
+  return id === undefined ? getCurrentPlayer(state) : getPlayer(state, id);
 }
 
 export function getCurrentPlayer(state: GameState): Player | undefined {

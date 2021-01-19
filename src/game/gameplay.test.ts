@@ -4,7 +4,7 @@ import {
   getPlayer,
   pickupGun,
   resolveGunShot,
-  startGunShot,
+  fireGun,
 } from './gameplay';
 import {
   GameStage,
@@ -125,25 +125,24 @@ describe('shooting players', () => {
 
   test('starting gun shot at player', () => {
     pickupGun(state);
-    aimGun(state, 1);
-    startGunShot(state, 1);
+    aimGun(state, {target: 1});
+    fireGun(state);
     expect(state.turn.pendingGunShot).toEqual({target: 1});
     expect(state.turn.stage).toEqual(TurnStage.GUN_FIRING);
   });
 
   test('can not start gun shot when not holding gun', () => {
-    startGunShot(state, 1);
+    fireGun(state);
     expect(state.turn.pendingGunShot).toBeUndefined();
   });
 
   test('can kill a regular player', () => {
     pickupGun(state);
-    aimGun(state, 1);
-    startGunShot(state, 1);
+    aimGun(state, {target: 1});
+    fireGun(state);
     resolveGunShot(state);
 
     const target = getPlayer(state, 1)!;
-
     expect(target.dead).toBe(true);
     expect(target.wounds).toBe(1);
     expect(target.integrityCards.every(c => c.state === FACE_UP)).toBe(true);
@@ -151,8 +150,8 @@ describe('shooting players', () => {
 
   test('can wound a boss', () => {
     pickupGun(state);
-    aimGun(state, 2);
-    startGunShot(state, 2);
+    aimGun(state, {target: 2});
+    fireGun(state);
     resolveGunShot(state);
 
     const target = getPlayer(state, 2)!;
@@ -166,8 +165,8 @@ describe('shooting players', () => {
     target.wounds = 1;
 
     pickupGun(state);
-    aimGun(state, 2);
-    startGunShot(state, 2);
+    aimGun(state, {target: 2});
+    fireGun(state);
     resolveGunShot(state);
 
     expect(target.dead).toBe(true);
