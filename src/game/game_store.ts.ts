@@ -5,6 +5,8 @@ const INITIAL_STATE: GameState = {
   players: [],
   gunsRemaining: 0,
   equipment: [],
+  selections: [],
+  viewings: [],
   turnDirection: TurnDirection.CLOCKWISE,
   stage: GameStage.PRE_GAME,
   turn: {

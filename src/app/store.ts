@@ -1,4 +1,4 @@
-import {configureStore, createSlice} from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import {gameSlice} from '../game/game_store.ts';
 // import counterReducer from '../features/counter/counterSlice';
 

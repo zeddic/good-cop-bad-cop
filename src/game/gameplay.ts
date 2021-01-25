@@ -3,9 +3,54 @@ import {
   GameState,
   IntegrityCardState,
   Player,
+  SelectableType,
   TurnDirection,
   TurnStage,
 } from './models';
+
+/**
+ * Investigates a target players integrity card, place it face up.
+ */
+export function investigatePlayer(
+  state: GameState,
+  options: {target: number; card: number}
+) {
+  // Verify the player/target are valid.
+  const target = getPlayer(state, options.target);
+  const player = getCurrentPlayer(state)!;
+  if (!target || !player) {
+    return;
+  }
+
+  // Validate the card exists.
+  const card = target.integrityCards[options.card];
+  if (!card) {
+    return;
+  }
+
+  // Validate the user has actions left.
+  if (state.turn.actionsLeft < 1) {
+    return;
+  }
+  state.turn.actionsLeft--;
+  if (state.turn.actionsLeft === 0) {
+    finishActionStage(state);
+  }
+
+  // Grant the current player visibility for this turn.
+  state.viewings.push({
+    id: generateId(),
+    playerViewing: player.id,
+    items: [
+      {
+        type: SelectableType.INTEGRITY_CARD,
+        player: target.id,
+        index: options.card,
+        fromSupply: false,
+      },
+    ],
+  });
+}
 
 /**
  * Causes the current player to pickup a gun, if available.
@@ -17,6 +62,7 @@ export function pickupGun(state: GameState, options: {player?: number} = {}) {
   if (player.gun) return;
   if (state.gunsRemaining <= 0) return;
   if (state.turn.stage !== TurnStage.TAKE_ACTION) return;
+  if (!canTakeAction(state)) return;
 
   state.gunsRemaining--;
   player.gun = {
@@ -70,8 +116,15 @@ export function fireGun(state: GameState, options: {player?: number} = {}) {
   if (!player.gun) {
     console.log(`Player ${player.id} is not holding a gun to fire.`);
     return;
-  } else if (player.gun.aimedAt === undefined) {
+  }
+
+  if (player.gun.aimedAt === undefined) {
     console.log(`Player ${player.id} has not aimed gun yet`);
+    return;
+  }
+
+  if (!canTakeAction(state)) {
+    console.log(`Player is out of actions`);
     return;
   }
 
@@ -87,6 +140,7 @@ export function fireGun(state: GameState, options: {player?: number} = {}) {
 
   state.turn.pendingGunShot = {target: target.id};
   state.turn.stage = TurnStage.GUN_FIRING;
+  state.turn.actionsLeft--;
 }
 
 /**
@@ -117,6 +171,11 @@ export function resolveGunShot(state: GameState) {
     target.dead = true;
   }
 
+  // Progress to the next turn stage.
+  if (!canTakeAction(state)) {
+    finishActionStage(state);
+  }
+
   // TODO: Mark the winner in game state.
   if (isBoss(target) && target.dead) {
     state.stage = GameStage.END_GAME;
@@ -131,6 +190,10 @@ export function endTurn(state: GameState) {
 
   const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
 
+  // Close any granted visibility.
+  state.viewings = [];
+
+  // Find the next player.
   const player = state.turn.activePlayer;
   const playerIdx = state.players.findIndex(p => p.id === player);
   const nextPlayerIdx =
@@ -139,11 +202,43 @@ export function endTurn(state: GameState) {
       : (playerIdx + turnDelta + state.players.length) % state.players.length;
   const nextPlayer = state.players[nextPlayerIdx];
 
+  // Move to the next turn and reset the turn stage.
   state.turn = {
     activePlayer: nextPlayer.id,
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
   };
+}
+
+// UTILITY RELATED FUNCTIONS
+
+/**
+ * Returns true if the current player can take an action still.
+ */
+export function canTakeAction(state: GameState) {
+  return (
+    state.turn.stage === TurnStage.TAKE_ACTION && state.turn.actionsLeft > 0
+  );
+}
+
+/**
+ * Finishes the current players action phase. Progresses to TAKE_AIM
+ * phase if they have a gun, otherwise goes immediatly to the POST
+ * turn phase.
+ */
+export function finishActionStage(state: GameState) {
+  if (state.turn.stage !== TurnStage.TAKE_ACTION) {
+    return;
+  }
+
+  state.turn.actionsLeft = 0;
+  const player = getCurrentPlayer(state)!;
+
+  if (player.gun) {
+    state.turn.stage = TurnStage.TAKE_AIM;
+  } else {
+    state.turn.stage = TurnStage.POST;
+  }
 }
 
 /**
@@ -174,4 +269,9 @@ function isAgent(player: Player) {
 
 function isKingPin(player: Player) {
   return player.integrityCards.some(c => c.type === 'king_pin');
+}
+
+let idGen = 0;
+function generateId(): number {
+  return idGen++;
 }

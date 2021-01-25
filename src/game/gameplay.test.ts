@@ -36,6 +36,8 @@ describe('ending turns', () => {
       ],
       gunsRemaining: 0,
       equipment: [],
+      selections: [],
+      viewings: [],
       turnDirection: TurnDirection.CLOCKWISE,
       stage: GameStage.PLAYING,
       turn: {
@@ -113,19 +115,22 @@ describe('shooting players', () => {
       ],
       gunsRemaining: 1,
       equipment: [],
+      selections: [],
+      viewings: [],
       turnDirection: TurnDirection.CLOCKWISE,
       stage: GameStage.PLAYING,
       turn: {
         activePlayer: 0,
         stage: TurnStage.TAKE_ACTION,
-        actionsLeft: 0,
+        actionsLeft: 2,
       },
     };
   });
 
-  test('starting gun shot at player', () => {
+  test('start to shoot gun shot at player', () => {
     pickupGun(state);
     aimGun(state, {target: 1});
+    state.turn.stage = TurnStage.TAKE_ACTION;
     fireGun(state);
     expect(state.turn.pendingGunShot).toEqual({target: 1});
     expect(state.turn.stage).toEqual(TurnStage.GUN_FIRING);
@@ -139,6 +144,7 @@ describe('shooting players', () => {
   test('can kill a regular player', () => {
     pickupGun(state);
     aimGun(state, {target: 1});
+    state.turn.stage = TurnStage.TAKE_ACTION;
     fireGun(state);
     resolveGunShot(state);
 
