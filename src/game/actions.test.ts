@@ -1,11 +1,5 @@
-import {
-  aimGun,
-  endTurn,
-  getPlayer,
-  pickupGun,
-  resolveGunShot,
-  fireGun,
-} from './gameplay';
+import {aimGun, pickupGun, resolveGunShot, fireGun} from './actions';
+import {getPlayer} from './common_utils';
 import {
   GameStage,
   GameState,
@@ -23,56 +17,6 @@ const KING_PIN = IntegrityCardType.KING_PIN;
 const AGENT = IntegrityCardType.AGENT;
 const FACE_UP = IntegrityCardState.FACE_UP;
 const FACE_DOWN = IntegrityCardState.FACE_DOWN;
-
-describe('ending turns', () => {
-  let state: GameState;
-
-  beforeEach(() => {
-    state = {
-      players: [
-        createPlayer({id: 0}),
-        createPlayer({id: 1}),
-        createPlayer({id: 2}),
-      ],
-      gunsRemaining: 0,
-      equipment: [],
-      selections: [],
-      viewings: [],
-      turnDirection: TurnDirection.CLOCKWISE,
-      stage: GameStage.PLAYING,
-      turn: {
-        activePlayer: 0,
-        stage: TurnStage.POST,
-        actionsLeft: 0,
-      },
-    };
-  });
-
-  test('clockwise', () => {
-    state.turnDirection = TurnDirection.CLOCKWISE;
-    endTurn(state);
-    expect(state.turn.activePlayer).toBe(1);
-    expect(state.turn.actionsLeft).toBe(1);
-    expect(state.turn.stage).toBe(TurnStage.TAKE_ACTION);
-  });
-
-  test('clockwise wrapping', () => {
-    state.turnDirection = TurnDirection.CLOCKWISE;
-    endTurn(state);
-    endTurn(state);
-    endTurn(state);
-    expect(state.turn.activePlayer).toBe(0);
-  });
-
-  test('counter clockwise wrapping', () => {
-    state.turnDirection = TurnDirection.COUNTER_CLOCKWISE;
-    endTurn(state);
-    expect(state.turn.activePlayer).toBe(2);
-    endTurn(state);
-    endTurn(state);
-    expect(state.turn.activePlayer).toBe(0);
-  });
-});
 
 describe('shooting players', () => {
   let state: GameState;
@@ -128,24 +72,21 @@ describe('shooting players', () => {
   });
 
   test('start to shoot gun shot at player', () => {
-    pickupGun(state);
-    aimGun(state, {target: 1});
-    state.turn.stage = TurnStage.TAKE_ACTION;
-    fireGun(state);
+    pickupGun(state, {player: 0});
+    aimGun(state, {player: 0, target: 1});
+    fireGun(state, {player: 0});
     expect(state.turn.pendingGunShot).toEqual({target: 1});
-    expect(state.turn.stage).toEqual(TurnStage.GUN_FIRING);
   });
 
   test('can not start gun shot when not holding gun', () => {
-    fireGun(state);
+    fireGun(state, {player: 0});
     expect(state.turn.pendingGunShot).toBeUndefined();
   });
 
   test('can kill a regular player', () => {
-    pickupGun(state);
-    aimGun(state, {target: 1});
-    state.turn.stage = TurnStage.TAKE_ACTION;
-    fireGun(state);
+    pickupGun(state, {player: 0});
+    aimGun(state, {player: 0, target: 1});
+    fireGun(state, {player: 0});
     resolveGunShot(state);
 
     const target = getPlayer(state, 1)!;
@@ -155,9 +96,9 @@ describe('shooting players', () => {
   });
 
   test('can wound a boss', () => {
-    pickupGun(state);
-    aimGun(state, {target: 2});
-    fireGun(state);
+    pickupGun(state, {player: 0});
+    aimGun(state, {player: 0, target: 2});
+    fireGun(state, {player: 0});
     resolveGunShot(state);
 
     const target = getPlayer(state, 2)!;
@@ -170,9 +111,9 @@ describe('shooting players', () => {
     const target = getPlayer(state, 2)!;
     target.wounds = 1;
 
-    pickupGun(state);
-    aimGun(state, {target: 2});
-    fireGun(state);
+    pickupGun(state, {player: 0});
+    aimGun(state, {player: 0, target: 2});
+    fireGun(state, {player: 0});
     resolveGunShot(state);
 
     expect(target.dead).toBe(true);
