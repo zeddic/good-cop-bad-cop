@@ -6,6 +6,7 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
+import {createPlayer} from './testing/test_utils';
 import {endTurn} from './turn_actions';
 
 describe('ending turns', () => {
@@ -58,17 +59,3 @@ describe('ending turns', () => {
     expect(state.turn.activePlayer).toBe(0);
   });
 });
-
-function createPlayer(options: {
-  id: number;
-  integrity?: IntegrityCard[];
-}): Player {
-  return {
-    id: options.id,
-    name: `Player ${options.id}`,
-    equipment: [],
-    integrityCards: options.integrity || [],
-    wounds: 0,
-    dead: false,
-  };
-}

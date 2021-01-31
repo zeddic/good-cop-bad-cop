@@ -2,6 +2,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {selectCurrentPlayer, selectTurn} from '../game/selectors';
 import './App.css';
+import {Player} from './Player';
 import {selectAll} from './store';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
   return (
     <div className="App">
       <button onClick={endTurn}>End Turn</button>
+      <Player player={currentPlayer}></Player>
       {/* <pre>{JSON.stringify(allState, null, 2)}</pre> */}
       <h2>Current Player</h2>
       <pre>{JSON.stringify(currentPlayer, null, 2)}</pre>

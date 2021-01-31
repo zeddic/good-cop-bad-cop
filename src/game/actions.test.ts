@@ -10,6 +10,7 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
+import {createIntegrityCard, createPlayer} from './testing/test_utils';
 
 const GOOD = IntegrityCardType.GOOD;
 const BAD = IntegrityCardType.BAD;
@@ -27,33 +28,33 @@ describe('shooting players', () => {
         0: createPlayer({
           id: 0,
           integrity: [
-            {type: GOOD, state: FACE_DOWN},
-            {type: GOOD, state: FACE_DOWN},
-            {type: BAD, state: FACE_DOWN},
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD}),
           ],
         }),
         1: createPlayer({
           id: 1,
           integrity: [
-            {type: GOOD, state: FACE_DOWN},
-            {type: BAD, state: FACE_UP},
-            {type: BAD, state: FACE_DOWN},
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD}),
+            createIntegrityCard({type: BAD}),
           ],
         }),
         2: createPlayer({
           id: 2,
           integrity: [
-            {type: BAD, state: FACE_DOWN},
-            {type: AGENT, state: FACE_UP},
-            {type: BAD, state: FACE_DOWN},
+            createIntegrityCard({type: BAD}),
+            createIntegrityCard({type: AGENT, state: FACE_UP}),
+            createIntegrityCard({type: BAD}),
           ],
         }),
         3: createPlayer({
           id: 3,
           integrity: [
-            {type: GOOD, state: FACE_DOWN},
-            {type: BAD, state: FACE_UP},
-            {type: KING_PIN, state: FACE_DOWN},
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD, state: FACE_UP}),
+            createIntegrityCard({type: KING_PIN}),
           ],
         }),
       },
@@ -123,17 +124,3 @@ describe('shooting players', () => {
     expect(state.stage === GameStage.END_GAME);
   });
 });
-
-function createPlayer(options: {
-  id: number;
-  integrity?: IntegrityCard[];
-}): Player {
-  return {
-    id: options.id,
-    name: `Player ${options.id}`,
-    equipment: [],
-    integrityCards: options.integrity || [],
-    wounds: 0,
-    dead: false,
-  };
-}

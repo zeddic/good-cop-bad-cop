@@ -75,6 +75,7 @@ export interface Gun {
 }
 
 export interface IntegrityCard {
+  id: number;
   type: IntegrityCardType;
   state: IntegrityCardState;
 }
@@ -92,6 +93,7 @@ export enum IntegrityCardState {
 }
 
 export interface EquipmentCard {
+  id: number;
   type: EquipmentCardType;
 }
 

@@ -95,8 +95,10 @@ export function getIntegrityCardAssignments(numPlayers: number) {
   return assignments;
 }
 
+let cardIdGen = 1;
+
 function createIntegrityCard(type: IntegrityCardType): IntegrityCard {
-  return {type, state: IntegrityCardState.FACE_DOWN};
+  return {id: cardIdGen++, type, state: IntegrityCardState.FACE_DOWN};
 }
 
 /**
