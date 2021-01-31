@@ -2,7 +2,7 @@ export interface GameState {
   players: Record<number, Player>;
   order: number[];
   turn: Turn;
-  gunsRemaining: number;
+  guns: Gun[];
   equipment: EquipmentCard[];
   turnDirection: TurnDirection;
   stage: GameStage;
@@ -71,6 +71,7 @@ export interface Player {
 }
 
 export interface Gun {
+  id: number;
   aimedAt?: number;
 }
 

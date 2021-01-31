@@ -6,7 +6,7 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
-import {createPlayer} from './testing/test_utils';
+import {createGuns, createPlayer} from './testing/test_utils';
 import {endTurn} from './turn_actions';
 
 describe('ending turns', () => {
@@ -20,7 +20,7 @@ describe('ending turns', () => {
         2: createPlayer({id: 2}),
       },
       order: [0, 1, 2],
-      gunsRemaining: 0,
+      guns: createGuns(),
       equipment: [],
       selections: [],
       viewings: [],

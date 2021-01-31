@@ -1,6 +1,7 @@
 import {
   GameStage,
   GameState,
+  Gun,
   IntegrityCard,
   IntegrityCardState,
   IntegrityCardType,
@@ -15,7 +16,7 @@ export function setupGame(numPlayers: number): GameState {
   return {
     players: indexPlayersById(players),
     order: players.map(p => p.id),
-    gunsRemaining: getNumberOfGunsForPlayers(numPlayers),
+    guns: createGunsForPlayers(numPlayers),
     equipment: [],
     selections: [],
     viewings: [],
@@ -29,6 +30,12 @@ export function setupGame(numPlayers: number): GameState {
   };
 }
 
+function createGunsForPlayers(numPlayers: number) {
+  const num = getNumberOfGunsForPlayers(numPlayers);
+  const guns = new Array(num).fill(null).map(createGun);
+  return guns;
+}
+
 function getNumberOfGunsForPlayers(numPlayers: number) {
   if (numPlayers <= 5) {
     return 2;
@@ -37,6 +44,14 @@ function getNumberOfGunsForPlayers(numPlayers: number) {
   } else {
     return 4;
   }
+}
+
+let gunIdGen = 1;
+
+function createGun(): Gun {
+  return {
+    id: gunIdGen++,
+  };
 }
 
 function indexPlayersById(players: Player[]): Record<number, Player> {
@@ -98,7 +113,11 @@ export function getIntegrityCardAssignments(numPlayers: number) {
 let cardIdGen = 1;
 
 function createIntegrityCard(type: IntegrityCardType): IntegrityCard {
-  return {id: cardIdGen++, type, state: IntegrityCardState.FACE_DOWN};
+  return {
+    id: cardIdGen++,
+    type,
+    state: IntegrityCardState.FACE_DOWN,
+  };
 }
 
 /**

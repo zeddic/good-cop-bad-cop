@@ -6,7 +6,7 @@ import {endTurn, turnInvestigatePlayer} from './turn_actions';
 const INITIAL_STATE: GameState = {
   players: {},
   order: [],
-  gunsRemaining: 0,
+  guns: [],
   equipment: [],
   selections: [],
   viewings: [],
@@ -23,9 +23,6 @@ export const gameSlice = createSlice({
   name: 'game',
   initialState: setupGame(4), // <-- temporary for testing
   reducers: {
-    increment: state => {
-      state.gunsRemaining += 1;
-    },
     pickupGun: state => {},
     aimGun: (state, action: PayloadAction<number>) => {},
     investigate: (state, action: PayloadAction<InvestigateOptions>) => {

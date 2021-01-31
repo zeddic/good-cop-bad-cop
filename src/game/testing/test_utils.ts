@@ -1,4 +1,5 @@
 import {
+  Gun,
   IntegrityCard,
   IntegrityCardState,
   IntegrityCardType,
@@ -36,4 +37,25 @@ export function createIntegrityCard(options: {
   const state = options.state || IntegrityCardState.FACE_DOWN;
   const type = options.type || IntegrityCardType.GOOD;
   return {id, type, state};
+}
+
+/**
+ * Creates a list of guns for testing.
+ */
+export function createGuns(options: {num?: number} = {}) {
+  const num = options.num || 4;
+  const guns = new Array(options.num).fill(null).map(() => createGun());
+  return guns;
+}
+
+let gunIdGen = 1;
+
+/**
+ * Creates a single gun for tests. Defaults to not being aimed at anyone.
+ */
+export function createGun(options: {aimedAt?: number} = {}): Gun {
+  return {
+    id: gunIdGen++,
+    aimedAt: options.aimedAt,
+  };
 }

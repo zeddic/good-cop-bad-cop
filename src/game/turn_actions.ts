@@ -22,7 +22,10 @@ export function turnInvestigatePlayer(
 
   // Investigate
   const player = getCurrentPlayer(state)!;
-  investigatePlayer(state, {...options, player: player?.id});
+  const success = investigatePlayer(state, {...options, player: player?.id});
+  if (!success) {
+    return;
+  }
 
   // Update how many actions the player has left.
   state.turn.actionsLeft--;

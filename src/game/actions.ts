@@ -17,18 +17,22 @@ import {
 export function investigatePlayer(
   state: GameState,
   options: {player: number; target: number; card: number}
-) {
+): boolean {
   // Verify the player/target are valid.
   const target = getPlayer(state, options.target);
   const player = getPlayer(state, options.player);
   if (!target || !player) {
-    return;
+    return false;
+  }
+
+  if (target.id === player.id) {
+    return false;
   }
 
   // Validate the card exists.
   const card = target.integrityCards[options.card];
   if (!card) {
-    return;
+    return false;
   }
 
   // Grant the player investigating visibility for this turn.
@@ -44,6 +48,8 @@ export function investigatePlayer(
       },
     ],
   });
+
+  return true;
 }
 
 /**
@@ -54,12 +60,11 @@ export function pickupGun(state: GameState, options: {player: number}) {
 
   if (!player) return;
   if (player.gun) return;
-  if (state.gunsRemaining <= 0) return;
+  if (state.guns.length === 0) return;
 
-  state.gunsRemaining--;
-  player.gun = {
-    aimedAt: undefined,
-  };
+  const gun = state.guns.pop()!;
+  delete gun.aimedAt;
+  player.gun = gun;
 }
 
 /**
@@ -140,6 +145,8 @@ export function resolveGunShot(state: GameState) {
   if (!turn.pendingGunShot) return;
   const target = getPlayer(state, turn.pendingGunShot.target);
   if (!target || target.dead) return;
+
+  // TODO: Return the gun to the supply
 
   // Turn their integrity cards face up
   for (const card of target.integrityCards) {

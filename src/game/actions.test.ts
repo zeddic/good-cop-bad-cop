@@ -10,7 +10,11 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
-import {createIntegrityCard, createPlayer} from './testing/test_utils';
+import {
+  createGuns,
+  createIntegrityCard,
+  createPlayer,
+} from './testing/test_utils';
 
 const GOOD = IntegrityCardType.GOOD;
 const BAD = IntegrityCardType.BAD;
@@ -59,7 +63,7 @@ describe('shooting players', () => {
         }),
       },
       order: [0, 1, 2, 3],
-      gunsRemaining: 1,
+      guns: createGuns({num: 1}),
       equipment: [],
       selections: [],
       viewings: [],
