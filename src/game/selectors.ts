@@ -30,6 +30,8 @@ export const selectPlayers = createSelector(
   }
 );
 
+export const selectGunSupply = createSelector(selectGame, s => s.guns);
+
 export const selectViewings = createSelector(selectGame, s => s.visibility);
 
 export const selectViewedIntegrityCards = createSelector(
