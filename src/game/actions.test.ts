@@ -23,8 +23,8 @@ describe('shooting players', () => {
 
   beforeEach(() => {
     state = {
-      players: [
-        createPlayer({
+      players: {
+        0: createPlayer({
           id: 0,
           integrity: [
             {type: GOOD, state: FACE_DOWN},
@@ -32,7 +32,7 @@ describe('shooting players', () => {
             {type: BAD, state: FACE_DOWN},
           ],
         }),
-        createPlayer({
+        1: createPlayer({
           id: 1,
           integrity: [
             {type: GOOD, state: FACE_DOWN},
@@ -40,7 +40,7 @@ describe('shooting players', () => {
             {type: BAD, state: FACE_DOWN},
           ],
         }),
-        createPlayer({
+        2: createPlayer({
           id: 2,
           integrity: [
             {type: BAD, state: FACE_DOWN},
@@ -48,7 +48,7 @@ describe('shooting players', () => {
             {type: BAD, state: FACE_DOWN},
           ],
         }),
-        createPlayer({
+        3: createPlayer({
           id: 3,
           integrity: [
             {type: GOOD, state: FACE_DOWN},
@@ -56,7 +56,8 @@ describe('shooting players', () => {
             {type: KING_PIN, state: FACE_DOWN},
           ],
         }),
-      ],
+      },
+      order: [0, 1, 2, 3],
       gunsRemaining: 1,
       equipment: [],
       selections: [],

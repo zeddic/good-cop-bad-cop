@@ -20,8 +20,7 @@ export function getCurrentPlayer(state: GameState): Player | undefined {
  * Finds a player with the given id.
  */
 export function getPlayer(state: GameState, id: number): Player | undefined {
-  const player = state.players.find(p => p.id === id);
-  return player;
+  return state.players[id];
 }
 
 /**

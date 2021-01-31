@@ -1,5 +1,6 @@
 export interface GameState {
-  players: Player[];
+  players: Record<number, Player>;
+  order: number[];
   turn: Turn;
   gunsRemaining: number;
   equipment: EquipmentCard[];

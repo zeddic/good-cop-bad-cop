@@ -13,11 +13,12 @@ describe('ending turns', () => {
 
   beforeEach(() => {
     state = {
-      players: [
-        createPlayer({id: 0}),
-        createPlayer({id: 1}),
-        createPlayer({id: 2}),
-      ],
+      players: {
+        0: createPlayer({id: 0}),
+        1: createPlayer({id: 1}),
+        2: createPlayer({id: 2}),
+      },
+      order: [0, 1, 2],
       gunsRemaining: 0,
       equipment: [],
       selections: [],

@@ -119,11 +119,11 @@ export function endTurn(state: GameState) {
 
   // Find the next player.
   const player = state.turn.activePlayer;
-  const playerIdx = state.players.findIndex(p => p.id === player);
+  const playerIdx = state.order.findIndex(id => id === player);
   const nextPlayerIdx =
     playerIdx === -1
       ? 0
-      : (playerIdx + turnDelta + state.players.length) % state.players.length;
+      : (playerIdx + turnDelta + state.order.length) % state.order.length;
   const nextPlayer = state.players[nextPlayerIdx];
 
   // Move to the next turn and reset the turn stage.

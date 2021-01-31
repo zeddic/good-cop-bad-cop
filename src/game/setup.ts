@@ -10,10 +10,15 @@ import {
 } from './models';
 
 export function setupGame(numPlayers: number): GameState {
+  const players = createPlayers(numPlayers);
+
   return {
-    players: createPlayers(numPlayers),
+    players: indexPlayersById(players),
+    order: players.map(p => p.id),
     gunsRemaining: getNumberOfGunsForPlayers(numPlayers),
     equipment: [],
+    selections: [],
+    viewings: [],
     turnDirection: TurnDirection.CLOCKWISE,
     stage: GameStage.PLAYING,
     turn: {
@@ -32,6 +37,14 @@ function getNumberOfGunsForPlayers(numPlayers: number) {
   } else {
     return 4;
   }
+}
+
+function indexPlayersById(players: Player[]): Record<number, Player> {
+  const playersById: Record<number, Player> = {};
+  for (const player of players) {
+    playersById[player.id] = player;
+  }
+  return playersById;
 }
 
 function createPlayers(numPlayers: number) {

@@ -2,7 +2,8 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GameStage, GameState, TurnDirection, TurnStage} from './models';
 
 const INITIAL_STATE: GameState = {
-  players: [],
+  players: {},
+  order: [],
   gunsRemaining: 0,
   equipment: [],
   selections: [],
