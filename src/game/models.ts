@@ -137,7 +137,7 @@ export enum SelectableType {
 export interface SelectedItem {
   type: SelectableType;
   player?: number;
-  index?: number;
+  id?: number;
   fromSupply?: boolean;
 }
 

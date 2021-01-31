@@ -39,7 +39,7 @@ export function investigatePlayer(
       {
         type: SelectableType.INTEGRITY_CARD,
         player: target.id,
-        index: options.card,
+        id: card.id,
         fromSupply: false,
       },
     ],

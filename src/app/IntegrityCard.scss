@@ -1,0 +1,56 @@
+$width: 312px / 4;
+$height: 463px / 4;
+
+.integrity-card {
+  display: inline-block;
+  width: $width;
+  height: $height;
+
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: $width $height + 1px;
+  border-radius: 8px;
+  border: 3px solid #fff;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, .5);
+  box-sizing: border-box;
+  margin-right: 8px;
+
+  outline-color: rgb(41, 126, 255);
+  vertical-align: middle;
+
+  &.good {
+    background-image: url('assets/good.png');
+  }
+
+  &.bad {
+    background-image: url('assets/bad.png');
+  }
+
+  &.agent {
+    background-image: url('assets/agent.png');
+  }
+
+  &.king_pin {
+    background-image: url('assets/kingpin.png');
+  }
+
+  &.face_down:not(.viewed) {
+    background-image: url('assets/integrity.png');
+    border-color: transparent;
+  }
+
+  position: relative;
+  &.viewed::after {
+    content: '';
+    position: absolute;
+    background-image: url('assets/visibility.png');
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    opacity: .7;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: 50px 50px;
+  }
+}
