@@ -9,7 +9,7 @@ const INITIAL_STATE: GameState = {
   guns: [],
   equipment: [],
   selections: [],
-  viewings: [],
+  visibility: [],
   turnDirection: TurnDirection.CLOCKWISE,
   stage: GameStage.PRE_GAME,
   turn: {

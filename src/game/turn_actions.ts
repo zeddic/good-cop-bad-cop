@@ -118,7 +118,7 @@ export function endTurn(state: GameState) {
   const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
 
   // Close any granted visibility.
-  state.viewings = [];
+  state.visibility = [];
 
   // Find the next player.
   const player = state.turn.activePlayer;

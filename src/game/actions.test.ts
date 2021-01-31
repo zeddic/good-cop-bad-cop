@@ -66,7 +66,7 @@ describe('shooting players', () => {
       guns: createGuns({num: 1}),
       equipment: [],
       selections: [],
-      viewings: [],
+      visibility: [],
       turnDirection: TurnDirection.CLOCKWISE,
       stage: GameStage.PLAYING,
       turn: {

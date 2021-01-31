@@ -23,7 +23,7 @@ describe('ending turns', () => {
       guns: createGuns(),
       equipment: [],
       selections: [],
-      viewings: [],
+      visibility: [],
       turnDirection: TurnDirection.CLOCKWISE,
       stage: GameStage.PLAYING,
       turn: {

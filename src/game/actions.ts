@@ -36,7 +36,7 @@ export function investigatePlayer(
   }
 
   // Grant the player investigating visibility for this turn.
-  state.viewings.push({
+  state.visibility.push({
     id: generateId(),
     playerViewing: player.id,
     items: [

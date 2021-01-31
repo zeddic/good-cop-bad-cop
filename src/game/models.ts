@@ -7,7 +7,7 @@ export interface GameState {
   turnDirection: TurnDirection;
   stage: GameStage;
   selections: Selection[];
-  viewings: Viewing[];
+  visibility: Visibility[];
 }
 
 export enum GameStage {
@@ -107,10 +107,9 @@ export enum EquipmentCardType {
 /**
  * Captures that a player is actively viewing a card.
  */
-export interface Viewing {
+export interface Visibility {
   id: number;
-  playerViewing: number;
-  description?: string;
+  player: number;
   items: SelectedItem[];
 }
 

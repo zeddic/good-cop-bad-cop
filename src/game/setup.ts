@@ -19,7 +19,7 @@ export function setupGame(numPlayers: number): GameState {
     guns: createGunsForPlayers(numPlayers),
     equipment: [],
     selections: [],
-    viewings: [],
+    visibility: [],
     turnDirection: TurnDirection.CLOCKWISE,
     stage: GameStage.PLAYING,
     turn: {
