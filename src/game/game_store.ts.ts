@@ -1,5 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GameStage, GameState, TurnDirection, TurnStage} from './models';
+import {setupGame} from './setup';
+import {endTurn} from './turn_actions';
 
 const INITIAL_STATE: GameState = {
   players: {},
@@ -19,12 +21,15 @@ const INITIAL_STATE: GameState = {
 
 export const gameSlice = createSlice({
   name: 'game',
-  initialState: INITIAL_STATE,
+  initialState: setupGame(4), // <-- temporary for testing
   reducers: {
     increment: state => {
       state.gunsRemaining += 1;
     },
     pickupGun: state => {},
     aimGun: (state, action: PayloadAction<number>) => {},
+    endTurn: state => {
+      endTurn(state);
+    },
   },
 });
