@@ -1,7 +1,12 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
-import {selectGunSupply, selectPlayers, selectTurn} from '../game/selectors';
+import {
+  selectActiveSelection,
+  selectGunSupply,
+  selectPlayers,
+  selectTurn,
+} from '../game/selectors';
 import './App.scss';
 import {Gun} from './Gun';
 import {Player} from './Player';
@@ -10,6 +15,7 @@ function App() {
   const turn = useSelector(selectTurn);
   const players = useSelector(selectPlayers);
   const gunSupply = useSelector(selectGunSupply);
+  const activeSelection = useSelector(selectActiveSelection);
 
   const dispatch = useDispatch();
 
@@ -22,6 +28,13 @@ function App() {
       <button onClick={endTurn}>End Turn</button>
       <h2>Current Turn</h2>
       <pre>{JSON.stringify(turn, null, 2)}</pre>
+
+      {activeSelection || (
+        <>
+          <strong>Select something to cointue!</strong>
+          <pre>{JSON.stringify(activeSelection, null, 2)}</pre>
+        </>
+      )}
 
       <h2>Players</h2>
       {players.map(player => (

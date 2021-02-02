@@ -1,3 +1,5 @@
+import {Gun} from '../app/Gun';
+
 export interface GameState {
   players: Record<number, Player>;
   order: number[];
@@ -20,7 +22,13 @@ export interface Turn {
   activePlayer: number;
   stage: TurnStage;
   actionsLeft: number;
-  pendingGunShot?: {target: number};
+  unresolvedGunShot?: UnresolvedGunShot;
+}
+
+export interface UnresolvedGunShot {
+  player: number;
+  target: number;
+  gun: number;
 }
 
 export enum TurnDirection {
@@ -39,12 +47,12 @@ export enum TurnStage {
   TAKE_ACTION = 'take_action',
 
   /**
-   * Phase 1b: The player fired a gun in the action phase and the bullet is
-   * traversing to the target player. This is a temporary, timed phased that
-   * exists so players may play equipment cards that can interrupt the bullet.
-   * After it resolves, play continues to Phase 2.
+   * Phase 1b: An action has been taken, but has not been resolved yet.
+   * For example, a gun has been fired, but it has not yet hit the
+   * target player. While in the unresolved state, players may use
+   * equipment cards to change the outcome.
    */
-  GUN_FIRING = 'gun_firing',
+  UNRESOLVED_ACTION = 'unresolved_action',
 
   /**
    * Phase 2: The player can pick who to aim their gun at. Only available
@@ -110,7 +118,20 @@ export enum EquipmentCardType {
 export interface Visibility {
   id: number;
   player: number;
-  items: SelectedItem[];
+  items: GameItem[];
+}
+
+export interface GameItem {
+  type: GameItemType;
+  id: number;
+  owner?: number;
+}
+
+export enum GameItemType {
+  INTEGRITY_CARD = 'integrity_card',
+  EQUIPMENT_CARD = 'equipment_card',
+  GUN = 'gun',
+  PLAYER = 'player',
 }
 
 /**
@@ -119,35 +140,56 @@ export interface Visibility {
  * card: "Pick a face down integrity card owned by another player"
  */
 export interface Selection {
-  id: string;
+  /**
+   * A unique id for this selection.
+   */
+  id: number;
+
+  /**
+   * The player who must make the selection.
+   */
   player: number;
-  type: SelectableType;
-  filters: SelectionFilter[];
-  count: number;
-  selected: SelectedItem[];
+
+  /**
+   * A query describing the items the user is allowed
+   * to select from.
+   */
+  query: Query;
+
+  /**
+   * The number of items the user must select.
+   */
+  numToSelect: number;
+
+  /**
+   * The items the user has selected so far.
+   */
+  selected: GameItem[];
 }
 
-export enum SelectableType {
-  INTEGRITY_CARD = 'integrity_card',
-  EQUIPMENT_CARD = 'equipment_card',
-  GUN = 'gun',
-  PLAYER = 'player',
+/**
+ * Describes a query that identifies pieces on the board.
+ */
+export interface Query {
+  type: GameItemType;
+  filters: QueryFilter[];
 }
 
-export interface SelectedItem {
-  type: SelectableType;
-  player?: number;
-  id?: number;
-  fromSupply?: boolean;
-}
+export type QueryFilter = IsPlayer | IsFaceDown;
 
-export type SelectionFilter = IsOwnedByPlayer | IsFaceDown;
-
-export interface IsOwnedByPlayer {
-  type: 'is_owned_by_player';
+/**
+ * Filters players that have a matching id or items that they own.
+ */
+export interface IsPlayer {
+  type: 'is_player';
   players: number[];
+  not?: boolean;
 }
 
+/**
+ * Filters items that are either face/up or face down.
+ * Only applies to IntegrityCards.
+ */
 export interface IsFaceDown {
   type: 'is_face_down';
   isFaceDown: boolean;

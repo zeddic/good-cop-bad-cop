@@ -4,6 +4,11 @@ import {
   IntegrityCardState,
   IntegrityCardType,
   Player,
+  GameItemType,
+  QueryFilter,
+  Selection,
+  EquipmentCard,
+  EquipmentCardType,
 } from '../models';
 
 /**
@@ -12,14 +17,17 @@ import {
 export function createPlayer(options: {
   id: number;
   integrity?: IntegrityCard[];
+  equipment?: EquipmentCard[];
+  gun?: Gun;
 }): Player {
   return {
     id: options.id,
     name: `Player ${options.id}`,
-    equipment: [],
+    equipment: options.equipment || [],
     integrityCards: options.integrity || [],
     wounds: 0,
     dead: false,
+    gun: options.gun,
   };
 }
 
@@ -39,6 +47,20 @@ export function createIntegrityCard(options: {
   return {id, type, state};
 }
 
+let equipmentIdGen = 1;
+
+/**
+ * Creates an equipment card for testing.
+ */
+export function createEquipmentCard(
+  options: {id?: number; type?: EquipmentCardType} = {}
+): EquipmentCard {
+  return {
+    type: options.type || EquipmentCardType.TRUTH_SERUM,
+    id: options.id || equipmentIdGen++,
+  };
+}
+
 /**
  * Creates a list of guns for testing.
  */
@@ -53,9 +75,32 @@ let gunIdGen = 1;
 /**
  * Creates a single gun for tests. Defaults to not being aimed at anyone.
  */
-export function createGun(options: {aimedAt?: number} = {}): Gun {
+export function createGun(options: {id?: number; aimedAt?: number} = {}): Gun {
   return {
-    id: gunIdGen++,
+    id: options.id || gunIdGen++,
     aimedAt: options.aimedAt,
+  };
+}
+
+let selectionIdGen = 1;
+
+/**
+ * Creates a selection for tests. Defaults to all integrity cards
+ * on the board.
+ */
+export function createSelection(options: {
+  player?: number;
+  type?: GameItemType;
+  filters?: QueryFilter[];
+}): Selection {
+  return {
+    id: selectionIdGen,
+    player: options.player || 1,
+    numToSelect: 1,
+    selected: [],
+    query: {
+      type: options.type || GameItemType.INTEGRITY_CARD,
+      filters: options.filters || [],
+    },
   };
 }

@@ -1,4 +1,4 @@
-import {GameState, Player} from './models';
+import {GameItem, GameItemType, GameState, Player} from './models';
 
 /**
  * If id is defined, returns a player with that id. If no id is defined,
@@ -21,6 +21,19 @@ export function getCurrentPlayer(state: GameState): Player | undefined {
  */
 export function getPlayer(state: GameState, id: number): Player | undefined {
   return state.players[id];
+}
+
+/**
+ * Get a list of all players in the game by their turn order.
+ */
+export function getPlayers(state: GameState) {
+  const list: Player[] = [];
+  for (const id of state.order) {
+    const player = state.players[id];
+    if (player) list.push(player);
+  }
+
+  return list;
 }
 
 /**

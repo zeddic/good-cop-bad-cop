@@ -4,12 +4,7 @@ import {
   getPlayerOrCurrent,
   isBoss,
 } from './common_utils';
-import {
-  GameStage,
-  GameState,
-  IntegrityCardState,
-  SelectableType,
-} from './models';
+import {GameStage, GameState, IntegrityCardState, GameItemType} from './models';
 
 /**
  * Investigates a target players integrity card, place it face up.
@@ -41,10 +36,9 @@ export function investigatePlayer(
     player: player.id,
     items: [
       {
-        type: SelectableType.INTEGRITY_CARD,
-        player: target.id,
+        owner: target.id,
+        type: GameItemType.INTEGRITY_CARD,
         id: card.id,
-        fromSupply: false,
       },
     ],
   });
@@ -107,46 +101,73 @@ export function aimGun(
  * is called. This gives us time to show the in-progress shot in the
  * UI and players to play equipment cards.
  */
-export function fireGun(state: GameState, options: {player: number}) {
+export function fireGun(state: GameState, options: {player: number}): boolean {
   const player = getPlayer(state, options.player);
-  if (!player) return;
+  if (!player) {
+    return false;
+  }
 
   if (!player.gun) {
     console.log(`Player ${player.id} is not holding a gun to fire.`);
-    return;
+    return false;
   }
 
   if (player.gun.aimedAt === undefined) {
     console.log(`Player ${player.id} has not aimed gun yet`);
-    return;
+    return false;
   }
 
   const target = getPlayer(state, player.gun.aimedAt);
 
   if (!target) {
     console.log(`Cannot fire gun at invalid target ${player.gun.aimedAt}`);
-    return;
+    return false;
   } else if (target.dead) {
     console.log('Target player is already dead');
-    return;
+    return false;
   }
 
-  state.turn.pendingGunShot = {target: target.id};
+  state.turn.unresolvedGunShot = {
+    player: player.id,
+    target: target.id,
+    gun: player.gun.id,
+  };
+
+  return true;
 }
 
 /**
  * Resolves an in-progress gun shot.
  */
 export function resolveGunShot(state: GameState) {
-  // This dependency on turn in implies my model has something wrong.
-  // Should resolve gun shot become a stack outside of turn?
   const turn = state.turn;
 
-  if (!turn.pendingGunShot) return;
-  const target = getPlayer(state, turn.pendingGunShot.target);
-  if (!target || target.dead) return;
+  if (!turn.unresolvedGunShot) {
+    return;
+  }
 
-  // TODO: Return the gun to the supply
+  // Mark it as resolved. Even if we need to give up because the
+  // game somehow got into a bad state, we don't want a permanently
+  // unresolved gunshot preventing the game from proceeding.
+  const gunShot = turn.unresolvedGunShot;
+  delete turn.unresolvedGunShot;
+
+  // Return the gun to the supply.
+  const player = getPlayer(state, gunShot.player);
+  if (!player) {
+    return;
+  }
+
+  if (player.gun) {
+    state.guns.push(player.gun);
+    delete player.gun;
+  }
+
+  // Find the target Player
+  const target = getPlayer(state, gunShot.target);
+  if (!target || target.dead) {
+    return;
+  }
 
   // Turn their integrity cards face up
   for (const card of target.integrityCards) {

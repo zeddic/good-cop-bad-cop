@@ -1,4 +1,10 @@
-import {investigatePlayer, pickupGun, resolveGunShot} from './actions';
+import {
+  aimGun,
+  fireGun,
+  investigatePlayer,
+  pickupGun,
+  resolveGunShot,
+} from './actions';
 import {getCurrentPlayer} from './common_utils';
 import {GameStage, GameState, TurnDirection, TurnStage} from './models';
 
@@ -63,14 +69,13 @@ export function turnPickupGun(state: GameState) {
  * Has the current player aim their gun at another.
  * Moves forward to the next turn stage.
  */
-export function turnAimGun(state: GameState) {
+export function turnAimGun(state: GameState, options: {target: number}) {
   if (state.turn.stage !== TurnStage.TAKE_AIM) {
     return;
   }
 
   const player = getCurrentPlayer(state)!;
-  pickupGun(state, {player: player.id});
-
+  aimGun(state, {player: player.id, target: options.target});
   state.turn.stage = TurnStage.POST;
 }
 
@@ -89,11 +94,14 @@ export function turnFireGun(state: GameState) {
     return;
   }
 
-  // TODO: Visit how gun firing is done. We have this special stage,
-  // but it is a little odd. It may cause problems if we start having
-  // equipement cards that can also trigger gun shots. In which
-  // case we could have multiple in progress and things get confusing.
-  state.turn.stage = TurnStage.GUN_FIRING;
+  // Fire the gun
+  const player = getCurrentPlayer(state)!;
+  const ok = fireGun(state, {player: player.id});
+  if (!ok) {
+    return;
+  }
+
+  state.turn.stage = TurnStage.UNRESOLVED_ACTION;
   state.turn.actionsLeft--;
 }
 
@@ -106,6 +114,8 @@ export function turnResolveGunShot(state: GameState) {
 
   if (state.turn.actionsLeft === 0) {
     finishActionStage(state);
+  } else {
+    state.turn.stage = TurnStage.TAKE_ACTION;
   }
 }
 
@@ -113,7 +123,9 @@ export function turnResolveGunShot(state: GameState) {
  * Ends the current players turn.
  */
 export function endTurn(state: GameState) {
-  if (state.stage !== GameStage.PLAYING) return;
+  if (state.stage !== GameStage.PLAYING) {
+    return;
+  }
 
   const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
 

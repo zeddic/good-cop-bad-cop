@@ -81,12 +81,16 @@ describe('shooting players', () => {
     pickupGun(state, {player: 0});
     aimGun(state, {player: 0, target: 1});
     fireGun(state, {player: 0});
-    expect(state.turn.pendingGunShot).toEqual({target: 1});
+    expect(state.turn.unresolvedGunShot).toEqual({
+      player: 0,
+      target: 1,
+      gun: 1,
+    });
   });
 
   test('can not start gun shot when not holding gun', () => {
     fireGun(state, {player: 0});
-    expect(state.turn.pendingGunShot).toBeUndefined();
+    expect(state.turn.unresolvedGunShot).toBeUndefined();
   });
 
   test('can kill a regular player', () => {
@@ -99,6 +103,16 @@ describe('shooting players', () => {
     expect(target.dead).toBe(true);
     expect(target.wounds).toBe(1);
     expect(target.integrityCards.every(c => c.state === FACE_UP)).toBe(true);
+  });
+
+  test('guns are returned to the supply only after the shot is resolved', () => {
+    pickupGun(state, {player: 0});
+    aimGun(state, {player: 0, target: 1});
+    fireGun(state, {player: 0});
+    expect(state.guns.length).toBe(0);
+
+    resolveGunShot(state);
+    expect(state.guns.length).toBe(1);
   });
 
   test('can wound a boss', () => {
