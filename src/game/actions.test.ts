@@ -1,12 +1,10 @@
-import {aimGun, pickupGun, resolveGunShot, fireGun} from './actions';
+import {aimGun, fireGun, pickupGun, resolveGunShot} from './actions';
 import {getPlayer} from './common_utils';
 import {
   GameStage,
   GameState,
-  IntegrityCard,
   IntegrityCardState,
   IntegrityCardType,
-  Player,
   TurnDirection,
   TurnStage,
 } from './models';

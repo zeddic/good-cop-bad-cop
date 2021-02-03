@@ -1,19 +1,17 @@
-import {StringDecoder} from 'string_decoder';
 import {
   generateId,
-  getCurrentPlayer,
   getPlayer,
   getPlayerOrCurrent,
   isBoss,
   isKingPin,
 } from './common_utils';
 import {
+  GameItemType,
   GameStage,
   GameState,
   IntegrityCardState,
-  GameItemType,
-  Selection,
   Query,
+  Selection,
   Team,
 } from './models';
 import {findItems} from './queries';
@@ -37,7 +35,7 @@ export function investigatePlayer(
   }
 
   // Validate the card exists.
-  const card = target.integrityCards[options.card];
+  const card = target.integrityCards.find(c => c.id === options.card);
   if (!card) {
     return false;
   }
@@ -263,6 +261,8 @@ export function requirePlayerToRevealAnIntegrityCard(
     numToSelect: 1,
     selected: [],
     task: 'general.reveal_integrity_card',
+    description: 'Select an integrity card to reveal',
+    tooltip: 'Reveal this integrity card',
   };
 
   state.selections.push(selection);

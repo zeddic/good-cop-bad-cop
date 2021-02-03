@@ -1,4 +1,3 @@
-import {isDebuggerStatement} from 'typescript';
 import {
   aimGun,
   fireGun,
@@ -7,20 +6,15 @@ import {
   requirePlayerToRevealAnIntegrityCard,
   resolveGunShot,
 } from './actions';
-import {generateId, getCurrentPlayer} from './common_utils';
+import {getCurrentPlayer} from './common_utils';
 import {
   GameStage,
   GameState,
   IntegrityCardState,
-  Player,
+  Selection,
   TurnDirection,
   TurnStage,
-  Selection,
-  GameItemType,
-  Query,
-  GameItem,
 } from './models';
-import {findItems} from './queries';
 
 /**
  * Has the current player investigate another player.

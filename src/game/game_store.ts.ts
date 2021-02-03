@@ -1,5 +1,4 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {resolveGunShot} from './actions';
 import {
   GameItem,
   GameStage,
@@ -71,5 +70,5 @@ export const gameSlice = createSlice({
 
 export interface InvestigateOptions {
   player: number;
-  card: number; // idx
+  card: number;
 }

@@ -103,5 +103,6 @@ export function createSelection(options: {
       filters: options.filters || [],
     },
     task: 'noop',
+    description: 'Select something!',
   };
 }

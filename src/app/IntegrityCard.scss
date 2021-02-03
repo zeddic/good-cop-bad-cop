@@ -34,13 +34,13 @@ $height: 463px / 4;
     background-image: url('assets/kingpin.png');
   }
 
-  &.face_down:not(.viewed) {
+  &.face_down:not(.forced-visible) {
     background-image: url('assets/integrity.png');
     border-color: transparent;
   }
 
   position: relative;
-  &.viewed::after {
+  &.forced-visible::after {
     content: '';
     position: absolute;
     background-image: url('assets/visibility.png');
@@ -54,7 +54,16 @@ $height: 463px / 4;
     background-size: 50px 50px;
   }
 
+  &.clickable.clickable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: blue;
+    }
+  }
+
   &.selectable.selectable {
     border-color: rgb(199, 0, 0);
   }
+
 }

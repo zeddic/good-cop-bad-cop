@@ -1,6 +1,7 @@
+import {current} from 'immer';
 import {createSelector} from 'reselect';
 import {GameItemType, GameStage, GameState, Player, TurnStage} from './models';
-import {findSelectableItems} from './queries';
+import {findItemsAmongPlayers, findSelectableItems} from './queries';
 
 export function selectGame(rootState: any): GameState {
   return rootState.game;
@@ -125,6 +126,17 @@ export const selectCanTakeAction = createSelector(
 );
 
 /**
+ * Returns true if the user can arm a gun.
+ */
+export const selectCanArmGun = createSelector(
+  selectCanTakeAction,
+  selectCurrentPlayer,
+  (canTakeAction, currentPlayer) => {
+    return canTakeAction && !currentPlayer.gun;
+  }
+);
+
+/**
  * Whether the current player can fire their gun.
  * False if they don't have a gun equiped.
  */
@@ -191,6 +203,35 @@ export const selectAimablePlayers = createSelector(
     }
 
     return aimable;
+  }
+);
+
+/**
+ * Returns a set of integrity card ids that the current player may
+ * investigate during their turn.
+ */
+export const selectInvestigatableCards = createSelector(
+  selectCanTakeAction,
+  selectPlayers,
+  selectCurrentPlayer,
+  (canTakeAction, players, currentPlayer) => {
+    if (!canTakeAction) {
+      return new Set<number>();
+    }
+
+    const items = findItemsAmongPlayers(
+      {
+        type: GameItemType.INTEGRITY_CARD,
+        filters: [
+          {type: 'is_player', not: true, players: [currentPlayer.id]},
+          {type: 'is_face_down', isFaceDown: true},
+        ],
+      },
+      players
+    );
+
+    const ids = items.map(i => i.id);
+    return new Set(ids);
   }
 );
 

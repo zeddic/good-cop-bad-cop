@@ -1,10 +1,7 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
-import {
-  IntegrityCard as IntegrityCardModel,
-  Player as PlayerModel,
-} from '../game/models';
+import {Player as PlayerModel} from '../game/models';
 import {selectAimablePlayers, selectCurrentPlayer} from '../game/selectors';
 import {Gun} from './Gun';
 import {IntegrityCard} from './IntegrityCard';
@@ -20,26 +17,14 @@ export function Player(props: {player: PlayerModel}) {
   const canAimAt = useSelector(selectAimablePlayers).has(player.id);
   const wounds = new Array(player.wounds).fill(null).map((_, i) => i);
 
-  const classNames = ['player'];
-  if (currentPlayer.id === player.id) {
-    classNames.push('current');
-  }
-
-  if (player.dead) {
-    classNames.push('dead');
-  }
+  const classNames = [
+    'player',
+    currentPlayer.id === player.id ? 'current' : '',
+    player.dead ? 'dead' : '',
+  ];
 
   function onAimAtClicked() {
     dispatch(gameSlice.actions.aimGun(player.id));
-  }
-
-  function integrityCardClicked(idx: number, card: IntegrityCardModel) {
-    dispatch(
-      gameSlice.actions.investigate({
-        player: player.id,
-        card: idx,
-      })
-    );
   }
 
   return (
@@ -49,11 +34,7 @@ export function Player(props: {player: PlayerModel}) {
         {canAimAt && <button onClick={onAimAtClicked}>Aim at</button>}
       </h3>
       {integrityCards.map((card, idx) => (
-        <IntegrityCard
-          key={card.id}
-          card={card}
-          onClick={integrityCardClicked.bind(null, idx)}
-        ></IntegrityCard>
+        <IntegrityCard key={card.id} card={card} owner={player}></IntegrityCard>
       ))}
 
       {player.gun && <Gun gun={player.gun}></Gun>}

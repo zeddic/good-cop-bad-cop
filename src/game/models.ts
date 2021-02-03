@@ -180,6 +180,17 @@ export interface Selection {
    * 'equip.planted_evidence.place'
    */
   task: string;
+
+  /**
+   * A description of what the selection is for.
+   */
+  description: string;
+
+  /**
+   * An optional tooltip to describe what will happen if this
+   * item is picked.
+   */
+  tooltip?: string;
 }
 
 /**

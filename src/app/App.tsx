@@ -1,18 +1,16 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {pickupGun, resolveGunShot} from '../game/actions';
 import {gameSlice} from '../game/game_store.ts';
-import {Team, TurnStage} from '../game/models';
+import {Team} from '../game/models';
 import {
   selectActiveSelection,
-  selectCanTakeAction,
   selectCanEndTurn,
+  selectCanFireGun,
   selectCanSkipActionStage,
   selectGunSupply,
   selectPlayers,
   selectTurn,
   selectWinner,
-  selectCanFireGun,
 } from '../game/selectors';
 import './App.scss';
 import {Gun} from './Gun';
@@ -25,7 +23,6 @@ function App() {
   const activeSelection = useSelector(selectActiveSelection);
   const canEndTurn = useSelector(selectCanEndTurn);
   const canSkipActionStage = useSelector(selectCanSkipActionStage);
-  const canArm = useSelector(selectCanTakeAction);
   const canFireGun = useSelector(selectCanFireGun);
   const winner = useSelector(selectWinner);
   const unresolvedShot = turn.unresolvedGunShot;
@@ -38,12 +35,6 @@ function App() {
 
   function skipActionStage() {
     dispatch(gameSlice.actions.skipActionStage());
-  }
-
-  function pickupGun() {
-    if (canArm) {
-      dispatch(gameSlice.actions.pickupGun());
-    }
   }
 
   function fireGun() {
@@ -76,12 +67,7 @@ function App() {
         </h2>
       )}
 
-      {/* {activeSelection && (
-        <>
-          <strong>Select something to cointue!</strong>
-          <pre>{JSON.stringify(activeSelection, null, 2)}</pre>
-        </>
-      )} */}
+      {activeSelection && <strong>{activeSelection.description}</strong>}
 
       <h2>Players</h2>
       {players.map(player => (
@@ -90,7 +76,7 @@ function App() {
 
       <h2>Supply</h2>
       {gunSupply.map(gun => (
-        <Gun key={gun.id} gun={gun} onClick={pickupGun}></Gun>
+        <Gun key={gun.id} gun={gun}></Gun>
       ))}
     </div>
   );

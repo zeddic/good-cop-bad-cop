@@ -1,10 +1,14 @@
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {
+  Player as PlayerModel,
   IntegrityCard as IntegrityCardModel,
   IntegrityCardState,
+  IntegrityCardType,
 } from '../game/models';
 import {
+  selectActiveSelection,
+  selectInvestigatableCards,
   selectSelectableItems,
   selectVisibleIntegrityCards,
 } from '../game/selectors';
@@ -12,32 +16,78 @@ import {
 import './IntegrityCard.scss';
 
 export function IntegrityCard(props: {
+  owner: PlayerModel;
   card: IntegrityCardModel;
-  onClick?: (card: IntegrityCardModel) => void;
 }) {
   const card = props.card;
+  const owner = props.owner;
+  const isFaceUp = card.state === IntegrityCardState.FACE_UP;
+
   const dispatch = useDispatch();
   const visibleCards = useSelector(selectVisibleIntegrityCards);
+  const investigatable = useSelector(selectInvestigatableCards);
   const selectable = useSelector(selectSelectableItems).integrityCards;
+  const activeSelection = useSelector(selectActiveSelection);
+
+  const isInvestigatable = investigatable.has(card.id);
   const isSelectable = selectable.has(card.id);
+  const isClickable = isInvestigatable || isSelectable;
+  const isForcedVisible = visibleCards.has(card.id) && !isFaceUp;
+  const isVisible = isForcedVisible || isFaceUp;
 
-  const classNames = ['integrity-card', card.type, card.state];
-  if (visibleCards.has(card.id) && card.state !== IntegrityCardState.FACE_UP) {
-    classNames.push('viewed');
-  }
-
-  if (isSelectable) {
-    classNames.push('selectable');
-  }
+  const classNames2 = [
+    'integrity-card',
+    card.state,
+    isForcedVisible ? 'forced-visible' : '',
+    isSelectable ? 'selectable' : '',
+    isClickable ? 'clickable' : '',
+    isVisible ? card.type : '', // don't leak the identity in the DOM!
+  ];
 
   function clicked() {
     if (isSelectable) {
       const item = selectable.get(card.id)!;
       dispatch(gameSlice.actions.select(item));
+      return;
     }
 
-    props.onClick && props.onClick(card);
+    if (isInvestigatable) {
+      dispatch(
+        gameSlice.actions.investigate({
+          player: owner.id,
+          card: card.id,
+        })
+      );
+      return;
+    }
   }
 
-  return <button className={classNames.join(' ')} onClick={clicked}></button>;
+  function getTooltip() {
+    if (isSelectable) {
+      return activeSelection?.tooltip || 'Select this integrity card';
+    } else if (isInvestigatable) {
+      return 'Investigate!';
+    } else if (isVisible) {
+      if (card.type === IntegrityCardType.GOOD) {
+        return 'Good Cop';
+      } else if (card.type === IntegrityCardType.BAD) {
+        return 'Bad Cop';
+      } else if (card.type === IntegrityCardType.KING_PIN) {
+        return "It's the King Pin!";
+      } else {
+        return "It's the Agent!";
+      }
+    } else {
+      return '???';
+    }
+  }
+
+  return (
+    <button
+      className={classNames2.join(' ')}
+      disabled={!isClickable}
+      onClick={clicked}
+      title={getTooltip()}
+    ></button>
+  );
 }

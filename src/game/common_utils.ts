@@ -1,4 +1,4 @@
-import {GameItem, GameItemType, GameState, Player} from './models';
+import {GameState, Player} from './models';
 
 /**
  * If id is defined, returns a player with that id. If no id is defined,
