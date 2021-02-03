@@ -1,3 +1,4 @@
+import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {
@@ -5,6 +6,7 @@ import {
   Player as PlayerModel,
 } from '../game/models';
 import {selectCurrentPlayer} from '../game/selectors';
+import {Gun} from './Gun';
 import {IntegrityCard} from './IntegrityCard';
 import './Player.scss';
 
@@ -40,6 +42,8 @@ export function Player(props: {player: PlayerModel}) {
           onClick={clicked.bind(null, idx)}
         ></IntegrityCard>
       ))}
+
+      {player.gun && <Gun gun={player.gun}></Gun>}
     </div>
   );
 }

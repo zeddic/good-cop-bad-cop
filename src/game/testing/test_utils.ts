@@ -102,5 +102,6 @@ export function createSelection(options: {
       type: options.type || GameItemType.INTEGRITY_CARD,
       filters: options.filters || [],
     },
+    task: 'noop',
   };
 }

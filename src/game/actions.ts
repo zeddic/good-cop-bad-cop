@@ -1,10 +1,19 @@
 import {
   generateId,
+  getCurrentPlayer,
   getPlayer,
   getPlayerOrCurrent,
   isBoss,
 } from './common_utils';
-import {GameStage, GameState, IntegrityCardState, GameItemType} from './models';
+import {
+  GameStage,
+  GameState,
+  IntegrityCardState,
+  GameItemType,
+  Selection,
+  Query,
+} from './models';
+import {findItems} from './queries';
 
 /**
  * Investigates a target players integrity card, place it face up.
@@ -187,5 +196,83 @@ export function resolveGunShot(state: GameState) {
   // TODO: Mark the winner in game state.
   if (isBoss(target) && target.dead) {
     state.stage = GameStage.END_GAME;
+  }
+}
+
+/**
+ * Checks if a user has any face down integrity cards. If so, requires them
+ * to select one to reveal before the game may proceed.
+ */
+export function requirePlayerToRevealAnIntegrityCard(
+  state: GameState,
+  options: {player: number}
+) {
+  const player = getPlayer(state, options.player);
+
+  if (!player) {
+    return;
+  }
+
+  const query: Query = {
+    type: GameItemType.INTEGRITY_CARD,
+    filters: [
+      {type: 'is_face_down', isFaceDown: true},
+      {type: 'is_player', players: [player.id]},
+    ],
+  };
+
+  if (findItems(query, state).length === 0) {
+    return;
+  }
+
+  const selection: Selection = {
+    id: generateId(),
+    player: player?.id,
+    query: {
+      type: GameItemType.INTEGRITY_CARD,
+      filters: [
+        {type: 'is_face_down', isFaceDown: true},
+        {type: 'is_player', players: [player.id]},
+      ],
+    },
+    numToSelect: 1,
+    selected: [],
+    task: 'general.reveal_integrity_card',
+  };
+
+  state.selections.push(selection);
+}
+
+/**
+ * Reveals the selected integrity card.
+ * Triggered after a user selects an integrity card.
+ */
+export function revealSelectedIntegrityCard(
+  state: GameState,
+  selection: Selection
+) {
+  const selected = selection.selected[0]!;
+  const player = getPlayer(state, selected.owner!)!;
+  const card = player.integrityCards.filter(c => c.id === selected.id);
+
+  if (card.length === 1) {
+    card[0].state = IntegrityCardState.FACE_UP;
+  }
+}
+
+/**
+ * Handle the user completing a selection related to their turn.
+ */
+export function handleGeneralActionSelection(
+  state: GameState,
+  tasks: string[],
+  selection: Selection
+) {
+  const task = tasks.shift()!;
+
+  if (task === 'reveal_integrity_card') {
+    revealSelectedIntegrityCard(state, selection);
+  } else if (task === 'discard_equipment') {
+    // todo
   }
 }

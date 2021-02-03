@@ -3,10 +3,23 @@ import {
   fireGun,
   investigatePlayer,
   pickupGun,
+  requirePlayerToRevealAnIntegrityCard,
   resolveGunShot,
 } from './actions';
-import {getCurrentPlayer} from './common_utils';
-import {GameStage, GameState, TurnDirection, TurnStage} from './models';
+import {generateId, getCurrentPlayer} from './common_utils';
+import {
+  GameStage,
+  GameState,
+  IntegrityCardState,
+  Player,
+  TurnDirection,
+  TurnStage,
+  Selection,
+  GameItemType,
+  Query,
+  GameItem,
+} from './models';
+import {findItems} from './queries';
 
 /**
  * Has the current player investigate another player.
@@ -63,6 +76,8 @@ export function turnPickupGun(state: GameState) {
   if (state.turn.actionsLeft === 0) {
     finishActionStage(state);
   }
+
+  requirePlayerToRevealAnIntegrityCard(state, {player: player.id});
 }
 
 /**
@@ -147,6 +162,39 @@ export function endTurn(state: GameState) {
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
   };
+}
+
+/**
+ * Reveals the selected integrity card
+ */
+export function turnRevealIntegrityCard(
+  state: GameState,
+  selection: Selection
+) {
+  const selected = selection.selected[0];
+  const player = getCurrentPlayer(state)!;
+  const card = player.integrityCards.filter(c => c.id === selected.id);
+
+  if (card.length === 1) {
+    card[0].state = IntegrityCardState.FACE_UP;
+  }
+}
+
+/**
+ * Handle the user completing a selection related to their turn.
+ */
+export function turnHandleSelection(
+  state: GameState,
+  tasks: string[],
+  selection: Selection
+) {
+  const task = tasks.shift()!;
+
+  if (task === 'reveal_integrity_card') {
+    turnRevealIntegrityCard(state, selection);
+  } else if (task === 'discard_equipment') {
+    // todo
+  }
 }
 
 // UTILITY FUNCTIONS

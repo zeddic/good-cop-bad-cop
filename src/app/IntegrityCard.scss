@@ -53,4 +53,8 @@ $height: 463px / 4;
     background-position: 50% 50%;
     background-size: 50px 50px;
   }
+
+  &.selectable.selectable {
+    border-color: rgb(199, 0, 0);
+  }
 }

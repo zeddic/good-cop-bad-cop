@@ -1,5 +1,3 @@
-import {Gun} from '../app/Gun';
-
 export interface GameState {
   players: Record<number, Player>;
   order: number[];
@@ -165,6 +163,17 @@ export interface Selection {
    * The items the user has selected so far.
    */
   selected: GameItem[];
+
+  /**
+   * An identifier for what should be done after the selection
+   * is complete. This can be a dotted string to allow routing
+   * of sub tasks:
+   *
+   * eg:
+   * 'turn.reveal_integrity_card'
+   * 'equip.planted_evidence.place'
+   */
+  task: string;
 }
 
 /**

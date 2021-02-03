@@ -1,7 +1,14 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {GameStage, GameState, TurnDirection, TurnStage} from './models';
+import {
+  GameItem,
+  GameStage,
+  GameState,
+  TurnDirection,
+  TurnStage,
+} from './models';
+import {selectItem} from './selections';
 import {setupGame} from './setup';
-import {endTurn, turnInvestigatePlayer} from './turn_actions';
+import {endTurn, turnInvestigatePlayer, turnPickupGun} from './turn_actions';
 
 const INITIAL_STATE: GameState = {
   players: {},
@@ -21,9 +28,11 @@ const INITIAL_STATE: GameState = {
 
 export const gameSlice = createSlice({
   name: 'game',
-  initialState: setupGame(4), // <-- temporary for testing
+  initialState: setupGame(4) || INITIAL_STATE, // <-- temporary for testing
   reducers: {
-    pickupGun: state => {},
+    pickupGun: state => {
+      turnPickupGun(state);
+    },
     aimGun: (state, action: PayloadAction<number>) => {},
     investigate: (state, action: PayloadAction<InvestigateOptions>) => {
       turnInvestigatePlayer(state, {
@@ -33,6 +42,9 @@ export const gameSlice = createSlice({
     },
     endTurn: state => {
       endTurn(state);
+    },
+    select: (state, action: PayloadAction<GameItem>) => {
+      selectItem(state, action.payload);
     },
   },
 });

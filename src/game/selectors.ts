@@ -35,18 +35,24 @@ export const selectGunSupply = createSelector(selectGame, s => s.guns);
 
 export const selectVisibility = createSelector(selectGame, s => s.visibility);
 
-export const selectViewedIntegrityCards = createSelector(
+export const selectVisibleIntegrityCards = createSelector(
+  selectCurrentPlayer,
   selectVisibility,
-  views => {
-    // todo: combine this with the signed in player.
+  (currentPlayer, visibility) => {
     const visible = new Set<number>();
 
-    for (const view of views) {
+    for (const view of visibility) {
       for (let item of view.items) {
         if (item.type === GameItemType.INTEGRITY_CARD) {
           visible.add(item.id!);
         }
       }
+    }
+
+    // todo: this should be signed in player
+    // Players can always view their own cards, even if others cannot
+    for (const card of currentPlayer.integrityCards) {
+      visible.add(card.id);
     }
 
     return visible;
