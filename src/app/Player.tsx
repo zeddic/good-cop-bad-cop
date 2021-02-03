@@ -31,13 +31,17 @@ export function Player(props: {player: PlayerModel}) {
     <div className={classNames.join(' ')}>
       <h3>
         {player.name} {player.dead ? '(Dead)' : ''}
-        {canAimAt && <button onClick={onAimAtClicked}>Aim at</button>}
+        {canAimAt && (
+          <button className="btn" onClick={onAimAtClicked}>
+            Aim at
+          </button>
+        )}
       </h3>
       {integrityCards.map((card, idx) => (
         <IntegrityCard key={card.id} card={card} owner={player}></IntegrityCard>
       ))}
 
-      {player.gun && <Gun gun={player.gun}></Gun>}
+      {player.gun && <Gun gun={player.gun} owner={player} small={true}></Gun>}
 
       {!player.dead && wounds.map(i => <WoundToken key={i}></WoundToken>)}
     </div>

@@ -10,7 +10,11 @@ import {
 } from '../game/selectors';
 import './Gun.scss';
 
-export function Gun(props: {gun: GunModel; owner?: PlayerModel}) {
+export function Gun(props: {
+  gun: GunModel;
+  owner?: PlayerModel;
+  small?: boolean;
+}) {
   const gun = props.gun;
   const owner = props.owner;
   const inSupply = !owner;
@@ -26,6 +30,7 @@ export function Gun(props: {gun: GunModel; owner?: PlayerModel}) {
 
   const classNames = [
     'gun',
+    props.small ? 'small' : '',
     isSelectable ? 'selectable' : '',
     isClickable ? 'clickable' : '',
   ];

@@ -47,32 +47,47 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={endTurn} disabled={!canEndTurn}>
-        End Turn
-      </button>
+      <div className="game-bar">
+        <button className="btn" onClick={endTurn} disabled={!canEndTurn}>
+          End Turn
+        </button>
 
-      {canFireGun && <button onClick={fireGun}>Fire gun</button>}
+        {canFireGun && (
+          <button className="btn" onClick={fireGun}>
+            Fire gun
+          </button>
+        )}
 
-      {unresolvedShot && (
-        <button onClick={resolveGunShot}>Resolve Gun Shot</button>
-      )}
+        {unresolvedShot && (
+          <button className="btn" onClick={resolveGunShot}>
+            Resolve Gun Shot
+          </button>
+        )}
 
-      {canSkipActionStage && (
-        <button onClick={skipActionStage}>Skip Action</button>
-      )}
+        {canSkipActionStage && (
+          <button className="btn" onClick={skipActionStage}>
+            Skip Action
+          </button>
+        )}
 
-      {winner && (
-        <h2>
-          {winner === Team.GOOD ? 'The good cops win!' : 'The bad cops win!'}
-        </h2>
-      )}
+        {winner && (
+          <h2>
+            {winner === Team.GOOD ? 'The good cops win!' : 'The bad cops win!'}
+          </h2>
+        )}
 
-      {activeSelection && <strong>{activeSelection.description}</strong>}
+        {activeSelection && (
+          <div>
+            <strong>{activeSelection.description}</strong>
+          </div>
+        )}
+      </div>
 
-      <h2>Players</h2>
-      {players.map(player => (
-        <Player key={player.id} player={player}></Player>
-      ))}
+      <div className="players">
+        {players.map(player => (
+          <Player key={player.id} player={player}></Player>
+        ))}
+      </div>
 
       <h2>Supply</h2>
       {gunSupply.map(gun => (

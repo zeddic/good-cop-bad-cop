@@ -1,24 +1,29 @@
 
-$width: 300px / 2;
-$height: 200px / 2;
+$width: 300px;
+$height: 200px;
 
 .gun {
   display: inline-block;
-  width: $width;
-  height: $height;
+  width: $width / 2;
+  height: $height / 2;
 
   vertical-align: middle;
 
   background-image: url('assets/gun.png');
   background-position: 50% 50%;
   background-repeat: no-repeat;
-  background-size: $width $height;
+  background-size: 100% 100%;
   border: none;
   border-radius: 8px;
 
   margin: 0 4px 4px 0;
 
   box-shadow: 0px 0px 4px rgba(0, 0, 0, .5);
+
+  &.small {
+    width: $width / 3;
+    height: $height / 3;
+  }
 
   &.clickable {
     cursor: pointer;
