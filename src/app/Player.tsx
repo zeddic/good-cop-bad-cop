@@ -5,23 +5,35 @@ import {
   IntegrityCard as IntegrityCardModel,
   Player as PlayerModel,
 } from '../game/models';
-import {selectCurrentPlayer} from '../game/selectors';
+import {selectAimablePlayers, selectCurrentPlayer} from '../game/selectors';
 import {Gun} from './Gun';
 import {IntegrityCard} from './IntegrityCard';
 import './Player.scss';
+import {WoundToken} from './WoundToken';
 
 export function Player(props: {player: PlayerModel}) {
-  const dispatch = useDispatch();
-  const currentPlayer = useSelector(selectCurrentPlayer);
   const player = props.player;
   const integrityCards = player.integrityCards;
+
+  const dispatch = useDispatch();
+  const currentPlayer = useSelector(selectCurrentPlayer);
+  const canAimAt = useSelector(selectAimablePlayers).has(player.id);
+  const wounds = new Array(player.wounds).fill(null).map((_, i) => i);
 
   const classNames = ['player'];
   if (currentPlayer.id === player.id) {
     classNames.push('current');
   }
 
-  function clicked(idx: number, card: IntegrityCardModel) {
+  if (player.dead) {
+    classNames.push('dead');
+  }
+
+  function onAimAtClicked() {
+    dispatch(gameSlice.actions.aimGun(player.id));
+  }
+
+  function integrityCardClicked(idx: number, card: IntegrityCardModel) {
     dispatch(
       gameSlice.actions.investigate({
         player: player.id,
@@ -33,17 +45,20 @@ export function Player(props: {player: PlayerModel}) {
   return (
     <div className={classNames.join(' ')}>
       <h3>
-        {player.name} (#{player.id}) {player.dead ? 'DEAD' : ''}
+        {player.name} {player.dead ? '(Dead)' : ''}
+        {canAimAt && <button onClick={onAimAtClicked}>Aim at</button>}
       </h3>
       {integrityCards.map((card, idx) => (
         <IntegrityCard
           key={card.id}
           card={card}
-          onClick={clicked.bind(null, idx)}
+          onClick={integrityCardClicked.bind(null, idx)}
         ></IntegrityCard>
       ))}
 
       {player.gun && <Gun gun={player.gun}></Gun>}
+
+      {!player.dead && wounds.map(i => <WoundToken key={i}></WoundToken>)}
     </div>
   );
 }

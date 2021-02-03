@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {resolveGunShot} from './actions';
 import {
   GameItem,
   GameStage,
@@ -8,7 +9,15 @@ import {
 } from './models';
 import {selectItem} from './selections';
 import {setupGame} from './setup';
-import {endTurn, turnInvestigatePlayer, turnPickupGun} from './turn_actions';
+import {
+  endTurn,
+  finishActionStage,
+  turnAimGun,
+  turnFireGun,
+  turnInvestigatePlayer,
+  turnPickupGun,
+  turnResolveGunShot,
+} from './turn_actions';
 
 const INITIAL_STATE: GameState = {
   players: {},
@@ -33,12 +42,23 @@ export const gameSlice = createSlice({
     pickupGun: state => {
       turnPickupGun(state);
     },
-    aimGun: (state, action: PayloadAction<number>) => {},
+    aimGun: (state, action: PayloadAction<number>) => {
+      turnAimGun(state, {target: action.payload});
+    },
+    fireGun: state => {
+      turnFireGun(state);
+    },
     investigate: (state, action: PayloadAction<InvestigateOptions>) => {
       turnInvestigatePlayer(state, {
         target: action.payload.player,
         card: action.payload.card,
       });
+    },
+    resolveGunShot: state => {
+      turnResolveGunShot(state);
+    },
+    skipActionStage: state => {
+      finishActionStage(state);
     },
     endTurn: state => {
       endTurn(state);

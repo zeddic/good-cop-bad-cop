@@ -1,5 +1,5 @@
 import {createSelector} from 'reselect';
-import {GameItemType, GameState, Player} from './models';
+import {GameItemType, GameStage, GameState, Player, TurnStage} from './models';
 import {findSelectableItems} from './queries';
 
 export function selectGame(rootState: any): GameState {
@@ -17,6 +17,10 @@ export const selectOrder = createSelector(selectGame, s => s.order);
 
 export const selectPlayersById = createSelector(selectGame, s => s.players);
 
+export const selectGameStage = createSelector(selectGame, s => s.stage);
+
+export const selectWinner = createSelector(selectGame, s => s.winner);
+
 export const selectPlayers = createSelector(
   selectOrder,
   selectPlayersById,
@@ -30,6 +34,12 @@ export const selectPlayers = createSelector(
     return list;
   }
 );
+
+export function selectPlayer(id?: number) {
+  return createSelector(selectPlayersById, byId => {
+    return id ? byId[id] : undefined;
+  });
+}
 
 export const selectGunSupply = createSelector(selectGame, s => s.guns);
 
@@ -97,3 +107,116 @@ export const selectSelectableItems = createSelector(
   selectPlayers,
   findSelectableItems
 );
+
+/**
+ * Returns whether the current player can take any action-hase
+ * action (fire a gun, investigate, equip)
+ */
+export const selectCanTakeAction = createSelector(
+  selectTurn,
+  selectActiveSelection,
+  (turn, activeSelection) => {
+    return (
+      turn.stage === TurnStage.TAKE_ACTION &&
+      turn.actionsLeft > 0 &&
+      !activeSelection
+    );
+  }
+);
+
+/**
+ * Whether the current player can fire their gun.
+ * False if they don't have a gun equiped.
+ */
+export const selectCanFireGun = createSelector(
+  selectCanTakeAction,
+  selectCurrentPlayer,
+  (canTakeAction, currentPlayer) => {
+    return canTakeAction && currentPlayer.gun;
+  }
+);
+
+/**
+ * Returns whether the user can end their turn now.
+ */
+export const selectCanEndTurn = createSelector(
+  selectTurn,
+  selectActiveSelection,
+  selectGameStage,
+  (turn, selection, stage) => {
+    return (
+      !turn.unresolvedGunShot && !selection && stage !== GameStage.END_GAME
+    );
+  }
+);
+
+/**
+ * Returns whether the user is allowed to skip their action
+ * phase and go straight to the aiming phase of their turn.
+ */
+export const selectCanSkipActionStage = createSelector(
+  selectTurn,
+  selectCurrentPlayer,
+  selectActiveSelection,
+  (turn, currentPlayer, selection) => {
+    // The only point of allowing a user to skip the action phase is if they
+    // want to aim their gun. Otherwise, its equivalent to skipping their turn.
+    // So if a user doesn't have a gun, we just don't bother given them the option.
+    return (
+      turn.stage === TurnStage.TAKE_ACTION && currentPlayer.gun && !selection
+    );
+  }
+);
+
+/**
+ * Returns a set of player ids that may be aimed at by the
+ * current player.
+ */
+export const selectAimablePlayers = createSelector(
+  selectTurn,
+  selectCurrentPlayer,
+  selectPlayers,
+  selectActiveSelection,
+  (turn, currentPlayer, players, activeSelection) => {
+    const aimable = new Set<number>();
+
+    if (turn.stage !== TurnStage.TAKE_AIM || !!activeSelection) {
+      return aimable;
+    }
+
+    for (const player of players) {
+      if (player.id !== currentPlayer.id && !player.dead) {
+        aimable.add(player.id);
+      }
+    }
+
+    return aimable;
+  }
+);
+
+/**
+ * Returns the id of a gun that can be fired by the current player this turn
+ * Returns undefined if the current player can't fire their gun.
+ */
+export const selectFirableGun = createSelector(
+  selectCanTakeAction,
+  selectCurrentPlayer,
+  (canTakeAction, currentPlayer) => {
+    return canTakeAction && currentPlayer.gun
+      ? currentPlayer.gun.id
+      : undefined;
+  }
+);
+
+// export const selectUnresolvedShotDetails = createSelector(
+//   selectTurn,
+//   selectPlayersById,
+//   (turn, playersById) => {
+//     const shot = turn.unresolvedGunShot;
+//     if (!shot) return undefined;
+//     const src = playersById[shot.player];
+//     const dest = playersById[shot.target];
+//     const description = `${src.name} shot at ${dest.name}!`;
+//     return {description, shot};
+//   }
+// );

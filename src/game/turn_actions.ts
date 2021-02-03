@@ -1,3 +1,4 @@
+import {isDebuggerStatement} from 'typescript';
 import {
   aimGun,
   fireGun,
@@ -142,26 +143,46 @@ export function endTurn(state: GameState) {
     return;
   }
 
-  const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
-
-  // Close any granted visibility.
+  // Close any temporarily granted visibility.
   state.visibility = [];
 
   // Find the next player.
-  const player = state.turn.activePlayer;
-  const playerIdx = state.order.findIndex(id => id === player);
-  const nextPlayerIdx =
-    playerIdx === -1
-      ? 0
-      : (playerIdx + turnDelta + state.order.length) % state.order.length;
-  const nextPlayer = state.players[nextPlayerIdx];
+  const currentPlayer = state.turn.activePlayer;
+  const nextPlayer = findNextPlayerInTurnOrder(state, currentPlayer);
 
   // Move to the next turn and reset the turn stage.
   state.turn = {
-    activePlayer: nextPlayer.id,
+    activePlayer: nextPlayer,
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
   };
+}
+
+/**
+ * Finds the next player after the specified one in the turn order.
+ */
+function findNextPlayerInTurnOrder(state: GameState, player: number) {
+  const deadPlayers = findDeadPlayers(state);
+  const order = state.order;
+
+  // Everyone is dead!? Just give up.
+  if (deadPlayers.size === order.length) {
+    return player;
+  }
+
+  // Figure out our current point in the order list and what
+  // direction we should be walking.
+  const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
+  let playerIdx = order.findIndex(id => id === player);
+  playerIdx = playerIdx === -1 ? 0 : playerIdx;
+
+  // Keep walking in the turn direction until we find somone alive.
+  do {
+    playerIdx =
+      (playerIdx + turnDelta + state.order.length) % state.order.length;
+  } while (deadPlayers.has(order[playerIdx]));
+
+  return order[playerIdx];
 }
 
 /**
@@ -214,10 +235,6 @@ export function canTakeAction(state: GameState) {
  * turn phase.
  */
 export function finishActionStage(state: GameState) {
-  if (state.turn.stage !== TurnStage.TAKE_ACTION) {
-    return;
-  }
-
   state.turn.actionsLeft = 0;
   const player = getCurrentPlayer(state)!;
 
@@ -226,4 +243,12 @@ export function finishActionStage(state: GameState) {
   } else {
     state.turn.stage = TurnStage.POST;
   }
+}
+
+export function findDeadPlayers(state: GameState): Set<number> {
+  const deadIds = state.order.filter(playerId => {
+    return !!state.players[playerId]?.dead;
+  });
+
+  return new Set<number>(deadIds);
 }

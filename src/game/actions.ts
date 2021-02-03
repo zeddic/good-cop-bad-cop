@@ -1,9 +1,11 @@
+import {StringDecoder} from 'string_decoder';
 import {
   generateId,
   getCurrentPlayer,
   getPlayer,
   getPlayerOrCurrent,
   isBoss,
+  isKingPin,
 } from './common_utils';
 import {
   GameStage,
@@ -12,6 +14,7 @@ import {
   GameItemType,
   Selection,
   Query,
+  Team,
 } from './models';
 import {findItems} from './queries';
 
@@ -162,15 +165,7 @@ export function resolveGunShot(state: GameState) {
   delete turn.unresolvedGunShot;
 
   // Return the gun to the supply.
-  const player = getPlayer(state, gunShot.player);
-  if (!player) {
-    return;
-  }
-
-  if (player.gun) {
-    state.guns.push(player.gun);
-    delete player.gun;
-  }
+  returnPlayersGunToSupply(state, gunShot.player);
 
   // Find the target Player
   const target = getPlayer(state, gunShot.target);
@@ -191,11 +186,41 @@ export function resolveGunShot(state: GameState) {
     // todo: let them pick an equipment
   } else {
     target.dead = true;
+    returnPlayersGunToSupply(state, target.id);
+    returnPlayersEquipmentToSupply(state, target.id);
   }
 
   // TODO: Mark the winner in game state.
   if (isBoss(target) && target.dead) {
     state.stage = GameStage.END_GAME;
+    state.winner = isKingPin(target) ? Team.GOOD : Team.BAD;
+  }
+}
+
+/**
+ * If a player has any gun, returns it to the global supply.
+ */
+export function returnPlayersGunToSupply(state: GameState, playerId: number) {
+  const player = getPlayer(state, playerId);
+  if (player && player.gun) {
+    state.guns.push(player.gun);
+    delete player.gun;
+  }
+}
+
+/**
+ * If a player has an equipement cards, returns them to the global supply.
+ */
+export function returnPlayersEquipmentToSupply(
+  state: GameState,
+  playerId: number
+) {
+  const player = getPlayer(state, playerId);
+  if (player && player.equipment) {
+    for (const card of player.equipment) {
+      state.equipment.unshift(card);
+    }
+    player.equipment = [];
   }
 }
 

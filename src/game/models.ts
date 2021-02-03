@@ -8,6 +8,12 @@ export interface GameState {
   stage: GameStage;
   selections: Selection[];
   visibility: Visibility[];
+  winner?: Team;
+}
+
+export enum Team {
+  GOOD = 'good',
+  BAD = 'bad',
 }
 
 export enum GameStage {

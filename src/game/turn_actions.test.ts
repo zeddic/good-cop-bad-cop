@@ -58,4 +58,11 @@ describe('ending turns', () => {
     endTurn(state);
     expect(state.turn.activePlayer).toBe(0);
   });
+
+  test('skips dead people', () => {
+    state.players[1].dead = true;
+    endTurn(state);
+    // Expect Player #1 was skipped.
+    expect(state.turn.activePlayer).toBe(2);
+  });
 });

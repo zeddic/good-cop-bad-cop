@@ -6,4 +6,11 @@
     color: rgb(223, 0, 0);
   }
 
+  &.dead{
+    opacity: .5;
+
+    h3 {
+      text-decoration: line-through;
+    }
+  }
 }
