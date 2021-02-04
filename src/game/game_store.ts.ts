@@ -14,6 +14,7 @@ import {
   turnAimGun,
   turnFireGun,
   turnInvestigatePlayer,
+  turnPickupEquipment,
   turnPickupGun,
   turnResolveGunShot,
 } from './turn_actions';
@@ -43,6 +44,9 @@ export const gameSlice = createSlice({
   name: 'game',
   initialState: setupGame(4) || INITIAL_STATE, // <-- temporary for testing
   reducers: {
+    pickupEquipment: state => {
+      turnPickupEquipment(state);
+    },
     pickupGun: state => {
       turnPickupGun(state);
     },

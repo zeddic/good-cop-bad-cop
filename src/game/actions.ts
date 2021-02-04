@@ -57,7 +57,65 @@ export function investigatePlayer(
 }
 
 /**
- * Causes the current player to pickup a gun, if available.
+ * Causes the player to pickup an equipment card. If they have too many, they
+ * will be asked to discard one before gameplay will continue.
+ */
+export function pickupEquipment(state: GameState, options: {player: number}) {
+  const player = getPlayer(state, options.player);
+  const supply = state.shared.equipment;
+
+  if (!player) {
+    return;
+  }
+
+  if (supply.length === 0) {
+    return;
+  }
+
+  const card = supply.pop()!;
+  player.equipment.push(card);
+
+  if (player.equipment.length === 1) {
+    return;
+  }
+
+  state.shared.selections.push({
+    id: generateId(),
+    player: player?.id,
+    query: {
+      type: GameItemType.EQUIPMENT_CARD,
+      filters: [{type: 'is_player', players: [player.id]}],
+    },
+    numToSelect: 1,
+    selected: [],
+    task: 'general.discard_equipment_card',
+    description: 'Select an equipment card to discard',
+    tooltip: 'Discard this equipment card',
+  });
+}
+
+/**
+ * Discards the selected equipment card.
+ */
+export function discardSelectedEquipmentCard(
+  state: GameState,
+  selection: Selection
+) {
+  // Find the card.
+  const selected = selection.selected[0]!;
+  const player = getPlayer(state, selected.owner!)!;
+  const card = player.equipment.filter(c => c.id === selected.id)[0]!;
+
+  // Remove it from the player.
+  player.equipment = player.equipment.filter(c => c !== card);
+
+  // Add it back to the supply.
+  card.state = CardState.FACE_DOWN;
+  state.shared.equipment.unshift(card);
+}
+
+/**
+ * Causes the player to pickup a gun, if available.
  */
 export function pickupGun(state: GameState, options: {player: number}) {
   const player = getPlayer(state, options.player);
@@ -288,7 +346,7 @@ export function revealSelectedIntegrityCard(
 /**
  * Handle the user completing a selection related to their turn.
  */
-export function handleGeneralActionSelection(
+export function onGeneralSelection(
   state: GameState,
   tasks: string[],
   selection: Selection
@@ -297,7 +355,7 @@ export function handleGeneralActionSelection(
 
   if (task === 'reveal_integrity_card') {
     revealSelectedIntegrityCard(state, selection);
-  } else if (task === 'discard_equipment') {
-    // todo
+  } else if (task === 'discard_equipment_card') {
+    discardSelectedEquipmentCard(state, selection);
   }
 }

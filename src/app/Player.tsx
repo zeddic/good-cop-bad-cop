@@ -3,6 +3,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Player as PlayerModel} from '../game/models';
 import {selectAimablePlayers, selectCurrentPlayer} from '../game/selectors';
+import {EquipmentCard} from './EquipmentCard';
 import {Gun} from './Gun';
 import {IntegrityCard} from './IntegrityCard';
 import './Player.scss';
@@ -11,6 +12,7 @@ import {WoundToken} from './WoundToken';
 export function Player(props: {player: PlayerModel}) {
   const player = props.player;
   const integrityCards = player.integrityCards;
+  const equipmentCards = player.equipment;
 
   const dispatch = useDispatch();
   const currentPlayer = useSelector(selectCurrentPlayer);
@@ -37,13 +39,30 @@ export function Player(props: {player: PlayerModel}) {
           </button>
         )}
       </h3>
-      {integrityCards.map((card, idx) => (
-        <IntegrityCard key={card.id} card={card} owner={player}></IntegrityCard>
-      ))}
 
-      {player.gun && <Gun gun={player.gun} owner={player} small={true}></Gun>}
+      <div className="cards">
+        {integrityCards.map((card, idx) => (
+          <IntegrityCard
+            key={card.id}
+            card={card}
+            owner={player}
+          ></IntegrityCard>
+        ))}
 
-      {!player.dead && wounds.map(i => <WoundToken key={i}></WoundToken>)}
+        {equipmentCards.map(card => (
+          <EquipmentCard
+            key={card.id}
+            card={card}
+            owner={player}
+          ></EquipmentCard>
+        ))}
+      </div>
+
+      <div className="tokens">
+        {player.gun && <Gun gun={player.gun} owner={player} small={true}></Gun>}
+
+        {!player.dead && wounds.map(i => <WoundToken key={i}></WoundToken>)}
+      </div>
     </div>
   );
 }

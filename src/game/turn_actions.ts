@@ -2,6 +2,7 @@ import {
   aimGun,
   fireGun,
   investigatePlayer,
+  pickupEquipment,
   pickupGun,
   requirePlayerToRevealAnIntegrityCard,
   resolveGunShot,
@@ -49,17 +50,31 @@ export function turnInvestigatePlayer(
 }
 
 /**
+ * Has the current player pickup an equipment card.
+ */
+export function turnPickupEquipment(state: GameState) {
+  if (!canTakeAction(state)) {
+    return;
+  }
+
+  const player = getCurrentPlayer(state)!;
+  pickupEquipment(state, {player: player.id});
+
+  // Update how many actions the player has left.
+  state.shared.turn.actionsLeft--;
+  if (state.shared.turn.actionsLeft === 0) {
+    finishActionStage(state);
+  }
+
+  requirePlayerToRevealAnIntegrityCard(state, {player: player.id});
+}
+
+/**
  * Has the current player to pickup a gun.
  * Moves forward to the next turn stage.
  */
 export function turnPickupGun(state: GameState) {
-  // Validate the user has actions left.
-  if (state.shared.turn.actionsLeft < 1) {
-    return;
-  }
-
-  // Validate this is the right stage.
-  if (state.shared.turn.stage !== TurnStage.TAKE_ACTION) {
+  if (!canTakeAction(state)) {
     return;
   }
 

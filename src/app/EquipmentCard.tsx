@@ -1,9 +1,16 @@
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {gameSlice} from '../game/game_store.ts';
 import {
   CardState,
   EquipmentCard as EquipmentCardModel,
   Player as PlayerModel,
 } from '../game/models';
+import {
+  selectActiveSelection,
+  selectCanEquip,
+  selectSelectableItems,
+  selectVisibleEquipmentCards,
+} from '../game/selectors';
 import './EquipmentCard.scss';
 
 export function EquipmentCard(props: {
@@ -12,24 +19,50 @@ export function EquipmentCard(props: {
 }) {
   const card = props.card;
   const owner = props.owner;
-  const isFaceUp = true || card.state === CardState.FACE_UP;
-  const isClickable = true;
-  const isForcedVisible = false && !isFaceUp;
+  const visibleCards = useSelector(selectVisibleEquipmentCards);
+  const canEquip = useSelector(selectCanEquip) && !owner;
+  const selectable = useSelector(selectSelectableItems).equipmentCards;
+  const activeSelection = useSelector(selectActiveSelection);
+
+  const isPlayable = false;
+  const isFaceUp = card.state === CardState.FACE_UP;
+  const isSelectable = selectable.has(card.id);
+  const isClickable = canEquip || isSelectable; // || canPlay
+  const isForcedVisible = visibleCards.has(card.id) && !isFaceUp;
   const isVisible = isForcedVisible || isFaceUp;
 
   const dispatch = useDispatch();
   const classNames2 = [
     'equipment-card',
     card.state,
-    isVisible ? card.type : '',
+    isForcedVisible ? 'forced-visible' : '',
+    isVisible ? 'visible' : '',
+    isSelectable ? 'selectable' : '',
+    isClickable ? 'clickable' : '',
+    isVisible ? card.type : '', // don't leak the card via the class name
   ];
 
   function clicked() {
     // todo: selection, or play, or pick up
+    if (isSelectable) {
+      const item = selectable.get(card.id)!;
+      dispatch(gameSlice.actions.select(item));
+    } else if (canEquip) {
+      dispatch(gameSlice.actions.pickupEquipment());
+    }
   }
 
   function getTooltip() {
-    return 'Its equipment!';
+    if (isSelectable) {
+      return activeSelection?.tooltip || 'Select this equipment';
+    } else if (isPlayable) {
+      return 'Investigate!';
+    } else if (isVisible) {
+      // TODO: Get the description from the config magp.
+      return '';
+    } else {
+      return 'Its equipment!';
+    }
   }
 
   return (

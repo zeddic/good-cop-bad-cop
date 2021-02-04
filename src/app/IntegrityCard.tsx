@@ -48,17 +48,13 @@ export function IntegrityCard(props: {
     if (isSelectable) {
       const item = selectable.get(card.id)!;
       dispatch(gameSlice.actions.select(item));
-      return;
-    }
-
-    if (isInvestigatable) {
+    } else if (isInvestigatable) {
       dispatch(
         gameSlice.actions.investigate({
           player: owner.id,
           card: card.id,
         })
       );
-      return;
     }
   }
 

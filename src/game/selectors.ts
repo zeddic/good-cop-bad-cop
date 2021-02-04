@@ -74,6 +74,30 @@ export const selectVisibleIntegrityCards = createSelector(
   }
 );
 
+export const selectVisibleEquipmentCards = createSelector(
+  selectCurrentPlayer,
+  selectVisibility,
+  (currentPlayer, visibility) => {
+    const visible = new Set<number>();
+
+    // Any forced visibility.
+    for (const view of visibility) {
+      for (let item of view.items) {
+        if (item.type === GameItemType.EQUIPMENT_CARD) {
+          visible.add(item.id!);
+        }
+      }
+    }
+
+    // Players can always view their own cards
+    for (const card of currentPlayer.equipment) {
+      visible.add(card.id);
+    }
+
+    return visible;
+  }
+);
+
 /**
  * Returns any selections that must be completed to progress the game.
  * Note that selections may be from a mixture of players: not just the current
@@ -149,6 +173,17 @@ export const selectCanFireGun = createSelector(
   selectCurrentPlayer,
   (canTakeAction, currentPlayer) => {
     return canTakeAction && currentPlayer.gun;
+  }
+);
+
+/**
+ * Whether the current player can equip a card.
+ */
+export const selectCanEquip = createSelector(
+  selectCanTakeAction,
+  selectCurrentPlayer,
+  (canTakeAction, currentPlayer) => {
+    return canTakeAction && currentPlayer.equipment.length < 2;
   }
 );
 

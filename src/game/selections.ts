@@ -1,4 +1,4 @@
-import {handleGeneralActionSelection} from './actions';
+import {onGeneralSelection} from './actions';
 import {getCurrentPlayer} from './common_utils';
 import {GameItem, GameState} from './models';
 
@@ -30,7 +30,7 @@ export function selectItem(state: GameState, item: GameItem) {
   const task = tasks.shift();
 
   if (task === 'general') {
-    handleGeneralActionSelection(state, tasks, selection);
+    onGeneralSelection(state, tasks, selection);
   } else if (task === 'equip') {
     // todo: route this to the equipment reducer once setup
   }
