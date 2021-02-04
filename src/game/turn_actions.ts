@@ -25,12 +25,12 @@ export function turnInvestigatePlayer(
   options: {target: number; card: number}
 ) {
   // Validate the user has actions left.
-  if (state.turn.actionsLeft < 1) {
+  if (state.shared.turn.actionsLeft < 1) {
     return;
   }
 
   // Validate this is the right stage.
-  if (state.turn.stage !== TurnStage.TAKE_ACTION) {
+  if (state.shared.turn.stage !== TurnStage.TAKE_ACTION) {
     return;
   }
 
@@ -42,8 +42,8 @@ export function turnInvestigatePlayer(
   }
 
   // Update how many actions the player has left.
-  state.turn.actionsLeft--;
-  if (state.turn.actionsLeft === 0) {
+  state.shared.turn.actionsLeft--;
+  if (state.shared.turn.actionsLeft === 0) {
     finishActionStage(state);
   }
 }
@@ -54,12 +54,12 @@ export function turnInvestigatePlayer(
  */
 export function turnPickupGun(state: GameState) {
   // Validate the user has actions left.
-  if (state.turn.actionsLeft < 1) {
+  if (state.shared.turn.actionsLeft < 1) {
     return;
   }
 
   // Validate this is the right stage.
-  if (state.turn.stage !== TurnStage.TAKE_ACTION) {
+  if (state.shared.turn.stage !== TurnStage.TAKE_ACTION) {
     return;
   }
 
@@ -67,8 +67,8 @@ export function turnPickupGun(state: GameState) {
   pickupGun(state, {player: player.id});
 
   // Update how many actions the player has left.
-  state.turn.actionsLeft--;
-  if (state.turn.actionsLeft === 0) {
+  state.shared.turn.actionsLeft--;
+  if (state.shared.turn.actionsLeft === 0) {
     finishActionStage(state);
   }
 
@@ -80,13 +80,13 @@ export function turnPickupGun(state: GameState) {
  * Moves forward to the next turn stage.
  */
 export function turnAimGun(state: GameState, options: {target: number}) {
-  if (state.turn.stage !== TurnStage.TAKE_AIM) {
+  if (state.shared.turn.stage !== TurnStage.TAKE_AIM) {
     return;
   }
 
   const player = getCurrentPlayer(state)!;
   aimGun(state, {player: player.id, target: options.target});
-  state.turn.stage = TurnStage.POST;
+  state.shared.turn.stage = TurnStage.POST;
 }
 
 /**
@@ -95,12 +95,12 @@ export function turnAimGun(state: GameState, options: {target: number}) {
  */
 export function turnFireGun(state: GameState) {
   // Validate the user has actions left.
-  if (state.turn.actionsLeft < 1) {
+  if (state.shared.turn.actionsLeft < 1) {
     return;
   }
 
   // Validate this is the right stage.
-  if (state.turn.stage !== TurnStage.TAKE_ACTION) {
+  if (state.shared.turn.stage !== TurnStage.TAKE_ACTION) {
     return;
   }
 
@@ -111,8 +111,8 @@ export function turnFireGun(state: GameState) {
     return;
   }
 
-  state.turn.stage = TurnStage.UNRESOLVED_ACTION;
-  state.turn.actionsLeft--;
+  state.shared.turn.stage = TurnStage.UNRESOLVED_ACTION;
+  state.shared.turn.actionsLeft--;
 }
 
 /**
@@ -122,10 +122,10 @@ export function turnFireGun(state: GameState) {
 export function turnResolveGunShot(state: GameState) {
   resolveGunShot(state);
 
-  if (state.turn.actionsLeft === 0) {
+  if (state.shared.turn.actionsLeft === 0) {
     finishActionStage(state);
   } else {
-    state.turn.stage = TurnStage.TAKE_ACTION;
+    state.shared.turn.stage = TurnStage.TAKE_ACTION;
   }
 }
 
@@ -133,19 +133,19 @@ export function turnResolveGunShot(state: GameState) {
  * Ends the current players turn.
  */
 export function endTurn(state: GameState) {
-  if (state.stage !== GameStage.PLAYING) {
+  if (state.shared.stage !== GameStage.PLAYING) {
     return;
   }
 
   // Close any temporarily granted visibility.
-  state.visibility = [];
+  state.shared.visibility = [];
 
   // Find the next player.
-  const currentPlayer = state.turn.activePlayer;
+  const currentPlayer = state.shared.turn.activePlayer;
   const nextPlayer = findNextPlayerInTurnOrder(state, currentPlayer);
 
   // Move to the next turn and reset the turn stage.
-  state.turn = {
+  state.shared.turn = {
     activePlayer: nextPlayer,
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
@@ -157,7 +157,8 @@ export function endTurn(state: GameState) {
  */
 function findNextPlayerInTurnOrder(state: GameState, player: number) {
   const deadPlayers = findDeadPlayers(state);
-  const order = state.order;
+  const order = state.shared.order;
+  const turnDirection = state.shared.turnDirection;
 
   // Everyone is dead!? Just give up.
   if (deadPlayers.size === order.length) {
@@ -166,14 +167,13 @@ function findNextPlayerInTurnOrder(state: GameState, player: number) {
 
   // Figure out our current point in the order list and what
   // direction we should be walking.
-  const turnDelta = state.turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
+  const turnDelta = turnDirection === TurnDirection.CLOCKWISE ? 1 : -1;
   let playerIdx = order.findIndex(id => id === player);
   playerIdx = playerIdx === -1 ? 0 : playerIdx;
 
   // Keep walking in the turn direction until we find somone alive.
   do {
-    playerIdx =
-      (playerIdx + turnDelta + state.order.length) % state.order.length;
+    playerIdx = (playerIdx + turnDelta + order.length) % order.length;
   } while (deadPlayers.has(order[playerIdx]));
 
   return order[playerIdx];
@@ -219,7 +219,8 @@ export function turnHandleSelection(
  */
 export function canTakeAction(state: GameState) {
   return (
-    state.turn.stage === TurnStage.TAKE_ACTION && state.turn.actionsLeft > 0
+    state.shared.turn.stage === TurnStage.TAKE_ACTION &&
+    state.shared.turn.actionsLeft > 0
   );
 }
 
@@ -229,19 +230,19 @@ export function canTakeAction(state: GameState) {
  * turn phase.
  */
 export function finishActionStage(state: GameState) {
-  state.turn.actionsLeft = 0;
+  state.shared.turn.actionsLeft = 0;
   const player = getCurrentPlayer(state)!;
 
   if (player.gun) {
-    state.turn.stage = TurnStage.TAKE_AIM;
+    state.shared.turn.stage = TurnStage.TAKE_AIM;
   } else {
-    state.turn.stage = TurnStage.POST;
+    state.shared.turn.stage = TurnStage.POST;
   }
 }
 
 export function findDeadPlayers(state: GameState): Set<number> {
-  const deadIds = state.order.filter(playerId => {
-    return !!state.players[playerId]?.dead;
+  const deadIds = state.shared.order.filter(playerId => {
+    return !!state.shared.players[playerId]?.dead;
   });
 
   return new Set<number>(deadIds);

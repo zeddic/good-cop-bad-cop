@@ -1,4 +1,24 @@
+/**
+ * All state for a game of good-cop-bad-cop.
+ */
 export interface GameState {
+  /**
+   * Game state that is synchronized between all players.
+   */
+  shared: SharedGameState;
+
+  /**
+   * State specific to the logged in user.
+   */
+  local: LocalGameState;
+}
+
+/**
+ * Overall game state synced between all remote players.
+ * This captures who the players are, turn order, cards
+ * that are in play, etc.
+ */
+export interface SharedGameState {
   players: Record<number, Player>;
   order: number[];
   turn: Turn;
@@ -9,6 +29,16 @@ export interface GameState {
   selections: Selection[];
   visibility: Visibility[];
   winner?: Team;
+}
+
+/**
+ * State that is specific to the local players instance.
+ */
+export interface LocalGameState {
+  /**
+   * The id of the local player.
+   */
+  player: number;
 }
 
 export enum Team {

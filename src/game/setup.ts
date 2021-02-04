@@ -6,11 +6,23 @@ import {
   IntegrityCardState,
   IntegrityCardType,
   Player,
+  SharedGameState,
   TurnDirection,
   TurnStage,
 } from './models';
 
 export function setupGame(numPlayers: number): GameState {
+  const shared = createSharedState(numPlayers);
+
+  return {
+    shared,
+    local: {
+      player: shared.order[0],
+    },
+  };
+}
+
+export function createSharedState(numPlayers: number): SharedGameState {
   const players = createPlayers(numPlayers);
 
   return {

@@ -12,7 +12,7 @@ export function getPlayerOrCurrent(state: GameState, id?: number) {
  * Returns the current turn player.
  */
 export function getCurrentPlayer(state: GameState): Player | undefined {
-  const id = state.turn.activePlayer;
+  const id = state.shared.turn.activePlayer;
   return getPlayer(state, id);
 }
 
@@ -20,7 +20,7 @@ export function getCurrentPlayer(state: GameState): Player | undefined {
  * Finds a player with the given id.
  */
 export function getPlayer(state: GameState, id: number): Player | undefined {
-  return state.players[id];
+  return state.shared.players[id];
 }
 
 /**
@@ -28,8 +28,8 @@ export function getPlayer(state: GameState, id: number): Player | undefined {
  */
 export function getPlayers(state: GameState) {
   const list: Player[] = [];
-  for (const id of state.order) {
-    const player = state.players[id];
+  for (const id of state.shared.order) {
+    const player = state.shared.players[id];
     if (player) list.push(player);
   }
 

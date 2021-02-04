@@ -6,7 +6,7 @@ export function selectItem(state: GameState, item: GameItem) {
   // TODO: I assume this is the current player. However, it should
   // really be the 'signed in player', but that doesn't exist yet.
   const player = getCurrentPlayer(state)!;
-  const selections = state.selections;
+  const selections = state.shared.selections;
   const selection = selections.filter(s => s.player === player.id)[0];
 
   if (!selection) {
@@ -21,7 +21,9 @@ export function selectItem(state: GameState, item: GameItem) {
   }
 
   // Remove the selection
-  state.selections = state.selections.filter(s => s.id !== selection.id);
+  state.shared.selections = state.shared.selections.filter(
+    s => s.id !== selection.id
+  );
 
   // Route it to be handled.
   const tasks = selection.task.split('.');

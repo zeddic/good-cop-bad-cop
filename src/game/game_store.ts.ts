@@ -19,18 +19,23 @@ import {
 } from './turn_actions';
 
 const INITIAL_STATE: GameState = {
-  players: {},
-  order: [],
-  guns: [],
-  equipment: [],
-  selections: [],
-  visibility: [],
-  turnDirection: TurnDirection.CLOCKWISE,
-  stage: GameStage.PRE_GAME,
-  turn: {
-    activePlayer: 0,
-    stage: TurnStage.TAKE_ACTION,
-    actionsLeft: 1,
+  local: {
+    player: 0,
+  },
+  shared: {
+    players: {},
+    order: [],
+    guns: [],
+    equipment: [],
+    selections: [],
+    visibility: [],
+    turnDirection: TurnDirection.CLOCKWISE,
+    stage: GameStage.PRE_GAME,
+    turn: {
+      activePlayer: 0,
+      stage: TurnStage.TAKE_ACTION,
+      actionsLeft: 1,
+    },
   },
 };
 

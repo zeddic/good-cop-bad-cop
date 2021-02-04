@@ -26,51 +26,56 @@ describe('shooting players', () => {
 
   beforeEach(() => {
     state = {
-      players: {
-        0: createPlayer({
-          id: 0,
-          integrity: [
-            createIntegrityCard({type: GOOD}),
-            createIntegrityCard({type: GOOD}),
-            createIntegrityCard({type: BAD}),
-          ],
-        }),
-        1: createPlayer({
-          id: 1,
-          integrity: [
-            createIntegrityCard({type: GOOD}),
-            createIntegrityCard({type: BAD}),
-            createIntegrityCard({type: BAD}),
-          ],
-        }),
-        2: createPlayer({
-          id: 2,
-          integrity: [
-            createIntegrityCard({type: BAD}),
-            createIntegrityCard({type: AGENT, state: FACE_UP}),
-            createIntegrityCard({type: BAD}),
-          ],
-        }),
-        3: createPlayer({
-          id: 3,
-          integrity: [
-            createIntegrityCard({type: GOOD}),
-            createIntegrityCard({type: BAD, state: FACE_UP}),
-            createIntegrityCard({type: KING_PIN}),
-          ],
-        }),
+      local: {
+        player: 0,
       },
-      order: [0, 1, 2, 3],
-      guns: createGuns({num: 1}),
-      equipment: [],
-      selections: [],
-      visibility: [],
-      turnDirection: TurnDirection.CLOCKWISE,
-      stage: GameStage.PLAYING,
-      turn: {
-        activePlayer: 0,
-        stage: TurnStage.TAKE_ACTION,
-        actionsLeft: 2,
+      shared: {
+        players: {
+          0: createPlayer({
+            id: 0,
+            integrity: [
+              createIntegrityCard({type: GOOD}),
+              createIntegrityCard({type: GOOD}),
+              createIntegrityCard({type: BAD}),
+            ],
+          }),
+          1: createPlayer({
+            id: 1,
+            integrity: [
+              createIntegrityCard({type: GOOD}),
+              createIntegrityCard({type: BAD}),
+              createIntegrityCard({type: BAD}),
+            ],
+          }),
+          2: createPlayer({
+            id: 2,
+            integrity: [
+              createIntegrityCard({type: BAD}),
+              createIntegrityCard({type: AGENT, state: FACE_UP}),
+              createIntegrityCard({type: BAD}),
+            ],
+          }),
+          3: createPlayer({
+            id: 3,
+            integrity: [
+              createIntegrityCard({type: GOOD}),
+              createIntegrityCard({type: BAD, state: FACE_UP}),
+              createIntegrityCard({type: KING_PIN}),
+            ],
+          }),
+        },
+        order: [0, 1, 2, 3],
+        guns: createGuns({num: 1}),
+        equipment: [],
+        selections: [],
+        visibility: [],
+        turnDirection: TurnDirection.CLOCKWISE,
+        stage: GameStage.PLAYING,
+        turn: {
+          activePlayer: 0,
+          stage: TurnStage.TAKE_ACTION,
+          actionsLeft: 2,
+        },
       },
     };
   });
@@ -79,7 +84,7 @@ describe('shooting players', () => {
     pickupGun(state, {player: 0});
     aimGun(state, {player: 0, target: 1});
     fireGun(state, {player: 0});
-    expect(state.turn.unresolvedGunShot).toEqual({
+    expect(state.shared.turn.unresolvedGunShot).toEqual({
       player: 0,
       target: 1,
       gun: 1,
@@ -88,7 +93,7 @@ describe('shooting players', () => {
 
   test('can not start gun shot when not holding gun', () => {
     fireGun(state, {player: 0});
-    expect(state.turn.unresolvedGunShot).toBeUndefined();
+    expect(state.shared.turn.unresolvedGunShot).toBeUndefined();
   });
 
   test('can kill a regular player', () => {
@@ -107,10 +112,10 @@ describe('shooting players', () => {
     pickupGun(state, {player: 0});
     aimGun(state, {player: 0, target: 1});
     fireGun(state, {player: 0});
-    expect(state.guns.length).toBe(0);
+    expect(state.shared.guns.length).toBe(0);
 
     resolveGunShot(state);
-    expect(state.guns.length).toBe(1);
+    expect(state.shared.guns.length).toBe(1);
   });
 
   test('can wound a boss', () => {
@@ -137,6 +142,6 @@ describe('shooting players', () => {
     expect(target.dead).toBe(true);
     expect(target.wounds).toBe(2);
 
-    expect(state.stage === GameStage.END_GAME);
+    expect(state.shared.stage === GameStage.END_GAME);
   });
 });

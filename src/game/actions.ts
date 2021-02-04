@@ -41,7 +41,7 @@ export function investigatePlayer(
   }
 
   // Grant the player investigating visibility for this turn.
-  state.visibility.push({
+  state.shared.visibility.push({
     id: generateId(),
     player: player.id,
     items: [
@@ -64,9 +64,9 @@ export function pickupGun(state: GameState, options: {player: number}) {
 
   if (!player) return;
   if (player.gun) return;
-  if (state.guns.length === 0) return;
+  if (state.shared.guns.length === 0) return;
 
-  const gun = state.guns.pop()!;
+  const gun = state.shared.guns.pop()!;
   delete gun.aimedAt;
   player.gun = gun;
 }
@@ -137,7 +137,7 @@ export function fireGun(state: GameState, options: {player: number}): boolean {
     return false;
   }
 
-  state.turn.unresolvedGunShot = {
+  state.shared.turn.unresolvedGunShot = {
     player: player.id,
     target: target.id,
     gun: player.gun.id,
@@ -150,7 +150,7 @@ export function fireGun(state: GameState, options: {player: number}): boolean {
  * Resolves an in-progress gun shot.
  */
 export function resolveGunShot(state: GameState) {
-  const turn = state.turn;
+  const turn = state.shared.turn;
 
   if (!turn.unresolvedGunShot) {
     return;
@@ -190,8 +190,8 @@ export function resolveGunShot(state: GameState) {
 
   // TODO: Mark the winner in game state.
   if (isBoss(target) && target.dead) {
-    state.stage = GameStage.END_GAME;
-    state.winner = isKingPin(target) ? Team.GOOD : Team.BAD;
+    state.shared.stage = GameStage.END_GAME;
+    state.shared.winner = isKingPin(target) ? Team.GOOD : Team.BAD;
   }
 }
 
@@ -201,7 +201,7 @@ export function resolveGunShot(state: GameState) {
 export function returnPlayersGunToSupply(state: GameState, playerId: number) {
   const player = getPlayer(state, playerId);
   if (player && player.gun) {
-    state.guns.push(player.gun);
+    state.shared.guns.push(player.gun);
     delete player.gun;
   }
 }
@@ -216,7 +216,7 @@ export function returnPlayersEquipmentToSupply(
   const player = getPlayer(state, playerId);
   if (player && player.equipment) {
     for (const card of player.equipment) {
-      state.equipment.unshift(card);
+      state.shared.equipment.unshift(card);
     }
     player.equipment = [];
   }
@@ -265,7 +265,7 @@ export function requirePlayerToRevealAnIntegrityCard(
     tooltip: 'Reveal this integrity card',
   };
 
-  state.selections.push(selection);
+  state.shared.selections.push(selection);
 }
 
 /**

@@ -7,20 +7,22 @@ export function selectGame(rootState: any): GameState {
   return rootState.game;
 }
 
-export const selectCurrentPlayer = createSelector(selectGame, state => {
+export const selectShared = createSelector(selectGame, g => g.shared);
+
+export const selectCurrentPlayer = createSelector(selectShared, state => {
   const active = state.turn.activePlayer;
   return state.players[active];
 });
 
-export const selectTurn = createSelector(selectGame, s => s.turn);
+export const selectTurn = createSelector(selectShared, s => s.turn);
 
-export const selectOrder = createSelector(selectGame, s => s.order);
+export const selectOrder = createSelector(selectShared, s => s.order);
 
-export const selectPlayersById = createSelector(selectGame, s => s.players);
+export const selectPlayersById = createSelector(selectShared, s => s.players);
 
-export const selectGameStage = createSelector(selectGame, s => s.stage);
+export const selectGameStage = createSelector(selectShared, s => s.stage);
 
-export const selectWinner = createSelector(selectGame, s => s.winner);
+export const selectWinner = createSelector(selectShared, s => s.winner);
 
 export const selectPlayers = createSelector(
   selectOrder,
@@ -42,9 +44,9 @@ export function selectPlayer(id?: number) {
   });
 }
 
-export const selectGunSupply = createSelector(selectGame, s => s.guns);
+export const selectGunSupply = createSelector(selectShared, s => s.guns);
 
-export const selectVisibility = createSelector(selectGame, s => s.visibility);
+export const selectVisibility = createSelector(selectShared, s => s.visibility);
 
 export const selectVisibleIntegrityCards = createSelector(
   selectCurrentPlayer,
@@ -75,7 +77,7 @@ export const selectVisibleIntegrityCards = createSelector(
  * Note that selections may be from a mixture of players: not just the current
  * player.
  */
-export const selectSelections = createSelector(selectGame, s => s.selections);
+export const selectSelections = createSelector(selectShared, s => s.selections);
 
 /**
  * Selects the first selection that the current player must complete.
