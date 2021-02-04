@@ -1,70 +1,157 @@
-import {EquipmentCard, GameState} from './models';
+import {
+  checkIfPlayerHasTooManyEquipmentCards,
+  requirePlayerToRevealAnIntegrityCard,
+} from './actions';
+import {generateId, getPlayer, removeItemWithId} from './common_utils';
+import {
+  CardState,
+  EquipmentCardConfig,
+  EquipmentCardResult,
+  EquipmentCardType,
+  GameItemType,
+  GameState,
+  Selection,
+} from './models';
+import {findItems} from './queries';
 
-export enum EquipmentCardResult {
-  /**
-   * The card has been played and there are no more results.
-   */
-  DONE = 'done',
+// ++++++++++++++++++++++++++++++++++++
+// Evidence Bag
+// ++++++++++++++++++++++++++++++++++++
+const EVIDENCE_BAG_CONFIG: EquipmentCardConfig = {
+  type: EquipmentCardType.EVIDENCE_BAG,
+  name: 'Evidence Bag',
+  description: 'Steal an Equipment card from any player.',
+  canPlay: (state: GameState, player: number) => {
+    const items = findItems(
+      {
+        type: GameItemType.EQUIPMENT_CARD,
+        filters: [{type: 'is_player', not: true, players: [player]}],
+      },
+      state
+    );
+    return items.length > 0;
+  },
+  play: (state: GameState, player: number) => {
+    const selection: Selection = {
+      id: generateId(),
+      player: player,
+      query: {
+        type: GameItemType.EQUIPMENT_CARD,
+        filters: [{type: 'is_player', not: true, players: [player]}],
+      },
+      numToSelect: 1,
+      selected: [],
+      task: 'equipment.evidence_bag.select',
+      description: 'Select an equipment card to steal',
+      tooltip: 'Steal this card',
+    };
 
-  /**
-   * The card is still in play and can't be discarded yet.
-   */
-  IN_PROGRESS = 'in_progress',
+    state.shared.selections.push(selection);
+    return EquipmentCardResult.IN_PROGRESS;
+  },
+  onSelect: (state: GameState, selection: Selection, task: string) => {
+    const item = selection.selected[0];
 
-  /**
-   * The card has been played but has some permanent passive effect.
-   * It has been placed in front of some target player. However,
-   * it should no longer block regular play.
-   */
-  PLACED = 'placed',
+    const player = getPlayer(state, selection.player)!;
+    const target = getPlayer(state, item.owner!)!;
+    const card = removeItemWithId(target.equipment, item.id);
+
+    if (card) {
+      player.equipment.push(card);
+      checkIfPlayerHasTooManyEquipmentCards(state, {player: player.id});
+    }
+
+    return EquipmentCardResult.DONE;
+  },
+};
+
+// ++++++++++++++++++++++++++++++++++++
+// Truth Serum
+// ++++++++++++++++++++++++++++++++++++
+const TRUTH_SERUM: EquipmentCardConfig = {
+  type: EquipmentCardType.TRUTH_SERUM,
+  name: 'Truth Serum',
+  description:
+    'Choose a player. That player chooses one of their ' +
+    'face-down integrity cards to turn face-up.',
+  canPlay: (state: GameState, player: number) => {
+    const targets = findPlayersWithAtLeastOneFacedownIntegrity(state, player);
+    return targets.length > 0;
+  },
+  play: (state: GameState, player: number) => {
+    const targets = findPlayersWithAtLeastOneFacedownIntegrity(state, player);
+    const selection: Selection = {
+      id: generateId(),
+      player: player,
+      query: {
+        type: GameItemType.PLAYER,
+        filters: [{type: 'is_player', players: targets}],
+      },
+      numToSelect: 1,
+      selected: [],
+      task: 'equipment.truth_serum.select_player',
+      description: 'Select a player to target',
+      tooltip: 'Force this player to reveal an integrity card',
+    };
+    state.shared.selections.push(selection);
+    return EquipmentCardResult.IN_PROGRESS;
+  },
+  onSelect: (state: GameState, selection: Selection, task: string) => {
+    const target = selection.selected[0].id;
+    requirePlayerToRevealAnIntegrityCard(state, {player: target});
+    return EquipmentCardResult.DONE;
+  },
+};
+
+function findPlayersWithAtLeastOneFacedownIntegrity(
+  state: GameState,
+  excludePlayer: number
+) {
+  return state.shared.order.filter(id => {
+    const player = state.shared.players[id];
+    if (!player || id === excludePlayer) {
+      return false;
+    }
+
+    const foundOne = player.integrityCards.some(card => {
+      return card.state === CardState.FACE_DOWN;
+    });
+
+    return foundOne;
+  });
 }
 
-export interface EquipmentCardConfig {
-  /**
-   * The type of card being configed.
-   */
-  type: EquipmentCard;
+/**
+ * Template for easy/copy pasting.
+ */
+const TEMPLATE: EquipmentCardConfig = {
+  type: EquipmentCardType.EVIDENCE_BAG,
+  name: 'Some name',
+  description: 'Some description',
+  canPlay: (state: GameState, player: number) => {
+    return true;
+  },
+  play: (state: GameState, player: number) => {
+    return EquipmentCardResult.IN_PROGRESS;
+  },
+  onSelect: (state: GameState, selection: Selection, task: string) => {
+    return EquipmentCardResult.DONE;
+  },
+};
 
-  /**
-   * A user friendly name for it.
-   */
-  name: string;
+const EQUIPMENT_CONFIGS: EquipmentCardConfig[] = [
+  EVIDENCE_BAG_CONFIG,
+  TRUTH_SERUM,
+];
 
-  /**
-   * The description of what the card does.
-   */
-  description: string;
+const EQUIPMENT_CONFIGS_BY_TYPE = (() => {
+  const map = new Map<EquipmentCardType, EquipmentCardConfig>();
+  for (const config of EQUIPMENT_CONFIGS) {
+    map.set(config.type, config);
+  }
+  return map;
+})();
 
-  /**
-   * A function that returns true if the card can be played right now.
-   * Different cards have different restrictions, such as only being
-   * playable on your turn or during the action phase.
-   *
-   * Note: No mater what the card returns here, equipment cards may not
-   * stack. One equipment card must be resolved before another equipment
-   * card can be played.
-   */
-  canPlay: (state: GameState) => boolean;
-
-  /**
-   * Plays the equipment card and applies its effects on the game state.
-   * Returns whether or not the card is still in progress or has completed.
-   */
-  play: (state: GameState) => EquipmentCardResult;
-
-  /**
-   * Handles a selection being complete which has been routed to this
-   * card. To route a selection to a fn, preface the {@code task} field
-   * of your {@code Selection} with `equipment.<card_name>.<your_task_name>`
-   *
-   * This method will be called with <your_task_name> and the selection upon
-   * the user picked all items.
-   *
-   * Returns whether or not the card is still in progress or has completed.
-   */
-  onSelect: (
-    state: GameState,
-    selection: Selection,
-    task: string
-  ) => EquipmentCardResult;
+export function getEquipmentConfig(type: EquipmentCardType) {
+  return EQUIPMENT_CONFIGS_BY_TYPE.get(type);
 }

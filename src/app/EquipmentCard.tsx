@@ -8,6 +8,7 @@ import {
 import {
   selectActiveSelection,
   selectCanEquip,
+  selectPlaybleEquipmentId,
   selectSelectableItems,
   selectVisibleEquipmentCards,
 } from '../game/selectors';
@@ -23,11 +24,11 @@ export function EquipmentCard(props: {
   const canEquip = useSelector(selectCanEquip) && !owner;
   const selectable = useSelector(selectSelectableItems).equipmentCards;
   const activeSelection = useSelector(selectActiveSelection);
+  const isPlayable = useSelector(selectPlaybleEquipmentId) === card.id;
 
-  const isPlayable = false;
   const isFaceUp = card.state === CardState.FACE_UP;
   const isSelectable = selectable.has(card.id);
-  const isClickable = canEquip || isSelectable; // || canPlay
+  const isClickable = canEquip || isSelectable || isPlayable;
   const isForcedVisible = visibleCards.has(card.id) && !isFaceUp;
   const isVisible = isForcedVisible || isFaceUp;
 
@@ -49,14 +50,23 @@ export function EquipmentCard(props: {
       dispatch(gameSlice.actions.select(item));
     } else if (canEquip) {
       dispatch(gameSlice.actions.pickupEquipment());
+    } else if (isPlayable) {
+      dispatch(
+        gameSlice.actions.playEquipment({
+          player: owner!.id,
+          card: card.id,
+        })
+      );
     }
   }
 
   function getTooltip() {
     if (isSelectable) {
       return activeSelection?.tooltip || 'Select this equipment';
+    } else if (canEquip) {
+      return 'Pickup this equipment';
     } else if (isPlayable) {
-      return 'Investigate!';
+      return 'Play this card!';
     } else if (isVisible) {
       // TODO: Get the description from the config magp.
       return '';

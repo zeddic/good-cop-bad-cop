@@ -1,5 +1,6 @@
 import {current} from 'immer';
 import {createSelector} from 'reselect';
+import {getEquipmentConfig} from './equipment';
 import {GameItemType, GameStage, GameState, Player, TurnStage} from './models';
 import {findItemsAmongPlayers, findSelectableItems} from './queries';
 
@@ -113,7 +114,8 @@ export const selectActiveSelection = createSelector(
   selectSelections,
   selectCurrentPlayer,
   (selections, currentPlayer) => {
-    return selections.filter(s => s.player === currentPlayer.id)[0];
+    return selections[0]; // <-- debugging
+    // return selections.filter(s => s.player === currentPlayer.id)[0];
   }
 );
 
@@ -148,6 +150,8 @@ export const selectCanTakeAction = createSelector(
     return (
       turn.stage === TurnStage.TAKE_ACTION &&
       turn.actionsLeft > 0 &&
+      !turn.unresolvedGunShot &&
+      !turn.unresolvedEquipment &&
       !activeSelection
     );
   }
@@ -188,15 +192,41 @@ export const selectCanEquip = createSelector(
 );
 
 /**
+ * Whether the current player may play their active equipment.
+ */
+export const selectCanPlayEquipment = createSelector(
+  selectGame,
+  selectTurn,
+  selectActiveSelection,
+  selectCurrentPlayer,
+  (state, turn, activeSelection, currentPlayer) => {
+    if (
+      turn.unresolvedEquipment ||
+      activeSelection ||
+      currentPlayer.equipment.length !== 1
+    ) {
+      return false;
+    }
+
+    const card = currentPlayer.equipment[0]!;
+    const config = getEquipmentConfig(card.type);
+    return config && config.canPlay(state, currentPlayer.id);
+  }
+);
+
+/**
  * Returns whether the user can end their turn now.
  */
 export const selectCanEndTurn = createSelector(
   selectTurn,
-  selectActiveSelection,
+  selectSelections,
   selectGameStage,
-  (turn, selection, stage) => {
+  (turn, selections, stage) => {
     return (
-      !turn.unresolvedGunShot && !selection && stage !== GameStage.END_GAME
+      !turn.unresolvedGunShot &&
+      !turn.unresolvedEquipment &&
+      selections.length === 0 &&
+      stage !== GameStage.END_GAME
     );
   }
 );
@@ -278,7 +308,7 @@ export const selectInvestigatableCards = createSelector(
  * Returns the id of a gun that can be fired by the current player this turn
  * Returns undefined if the current player can't fire their gun.
  */
-export const selectFirableGun = createSelector(
+export const selectFirableGunId = createSelector(
   selectCanTakeAction,
   selectCurrentPlayer,
   (canTakeAction, currentPlayer) => {
@@ -288,15 +318,14 @@ export const selectFirableGun = createSelector(
   }
 );
 
-// export const selectUnresolvedShotDetails = createSelector(
-//   selectTurn,
-//   selectPlayersById,
-//   (turn, playersById) => {
-//     const shot = turn.unresolvedGunShot;
-//     if (!shot) return undefined;
-//     const src = playersById[shot.player];
-//     const dest = playersById[shot.target];
-//     const description = `${src.name} shot at ${dest.name}!`;
-//     return {description, shot};
-//   }
-// );
+/**
+ * Returns the id an equipment card the current player may fire.
+ * Returns undefined if they can fire nothing.
+ */
+export const selectPlaybleEquipmentId = createSelector(
+  selectCanPlayEquipment,
+  selectCurrentPlayer,
+  (canPlay, currentPlayer) => {
+    return canPlay ? currentPlayer.equipment[0]!.id : undefined;
+  }
+);

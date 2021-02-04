@@ -1,3 +1,4 @@
+import {getEquipmentConfig} from './equipment';
 import {
   GameStage,
   GameState,
@@ -172,6 +173,11 @@ export function buildEquipmentDeck(): EquipmentCard[] {
   // different cards for different game sizes, but I prefer
   // the randomness.
   for (const type of types) {
+    // Only include cards that we have logic setup for.
+    if (!getEquipmentConfig(type)) {
+      continue;
+    }
+
     cards.push({
       id: id++,
       type,

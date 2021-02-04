@@ -4,7 +4,7 @@ import {Gun as GunModel, Player as PlayerModel} from '../game/models';
 import {
   selectActiveSelection,
   selectCanArmGun,
-  selectFirableGun,
+  selectFirableGunId,
   selectPlayer,
   selectSelectableItems,
 } from '../game/selectors';
@@ -23,7 +23,7 @@ export function Gun(props: {
   const selectable = useSelector(selectSelectableItems).guns;
   const target = useSelector(selectPlayer(gun.aimedAt));
   const activeSelection = useSelector(selectActiveSelection);
-  const isFireable = useSelector(selectFirableGun) === gun.id;
+  const isFireable = useSelector(selectFirableGunId) === gun.id;
   const isEquipable = useSelector(selectCanArmGun) && inSupply;
   const isSelectable = selectable.has(gun.id);
   const isClickable = isSelectable || isFireable || isEquipable;

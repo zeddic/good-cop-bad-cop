@@ -57,6 +57,30 @@ export function isKingPin(player: Player) {
   return player.integrityCards.some(c => c.type === 'king_pin');
 }
 
+/**
+ * Finds an item with the given id in the list. Undefined if not found.
+ */
+export function findItemWithId<T extends {id: number}>(list: T[], id: number) {
+  return list.find(i => i.id === id);
+}
+
+/**
+ * Removes an item from a list that has a given id. Returns the given item,
+ * or undefined if it could not be found.
+ */
+export function removeItemWithId<T extends {id: number}>(
+  list: T[],
+  id: number
+) {
+  const match = list.findIndex(i => (i.id = id));
+  if (match === -1) {
+    return undefined;
+  }
+
+  const removed = list.splice(match, 1)[0];
+  return removed;
+}
+
 let idGen = 0;
 
 /**

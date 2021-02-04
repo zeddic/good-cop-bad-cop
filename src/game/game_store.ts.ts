@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {playEquipment, selectItem} from './actions';
 import {
   GameItem,
   GameStage,
@@ -6,7 +7,6 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
-import {selectItem} from './selections';
 import {setupGame} from './setup';
 import {
   endTurn,
@@ -47,6 +47,9 @@ export const gameSlice = createSlice({
     pickupEquipment: state => {
       turnPickupEquipment(state);
     },
+    playEquipment: (state, action: PayloadAction<PlayEquipmentOptions>) => {
+      playEquipment(state, action.payload);
+    },
     pickupGun: state => {
       turnPickupGun(state);
     },
@@ -76,6 +79,11 @@ export const gameSlice = createSlice({
     },
   },
 });
+
+export interface PlayEquipmentOptions {
+  player: number;
+  card: number;
+}
 
 export interface InvestigateOptions {
   player: number;

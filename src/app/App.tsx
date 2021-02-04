@@ -1,7 +1,7 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
-import {CardState, Team} from '../game/models';
+import {Team} from '../game/models';
 import {
   selectActiveSelection,
   selectCanEndTurn,
@@ -22,7 +22,7 @@ function App() {
   const turn = useSelector(selectTurn);
   const players = useSelector(selectPlayers);
   const gunSupply = useSelector(selectGunSupply);
-  const equipment = useSelector(selectEquipment);
+  const equipment = useSelector(selectEquipment)[0];
   const activeSelection = useSelector(selectActiveSelection);
   const canEndTurn = useSelector(selectCanEndTurn);
   const canSkipActionStage = useSelector(selectCanSkipActionStage);
@@ -97,9 +97,7 @@ function App() {
         <Gun key={gun.id} gun={gun}></Gun>
       ))}
 
-      {equipment.map(card => (
-        <EquipmentCard key={card.id} card={card}></EquipmentCard>
-      ))}
+      {equipment && <EquipmentCard card={equipment}></EquipmentCard>}
     </div>
   );
 }

@@ -1,15 +1,21 @@
 import {
   generateId,
+  getCurrentPlayer,
   getPlayer,
   getPlayerOrCurrent,
   isBoss,
   isKingPin,
+  removeItemWithId,
 } from './common_utils';
+import {getEquipmentConfig} from './equipment';
 import {
+  CardState,
+  EquipmentCard,
+  EquipmentCardResult,
+  GameItem,
   GameItemType,
   GameStage,
   GameState,
-  CardState,
   Query,
   Selection,
   Team,
@@ -74,8 +80,19 @@ export function pickupEquipment(state: GameState, options: {player: number}) {
 
   const card = supply.pop()!;
   player.equipment.push(card);
+  checkIfPlayerHasTooManyEquipmentCards(state, {player: player.id});
+}
 
-  if (player.equipment.length === 1) {
+/**
+ * Check if a player has too many equipment cards. If so, asks them to
+ * select one to discard.
+ */
+export function checkIfPlayerHasTooManyEquipmentCards(
+  state: GameState,
+  options: {player: number}
+) {
+  const player = getPlayer(state, options.player);
+  if (!player || player.equipment.length <= 1) {
     return;
   }
 
@@ -88,7 +105,7 @@ export function pickupEquipment(state: GameState, options: {player: number}) {
     },
     numToSelect: 1,
     selected: [],
-    task: 'general.discard_equipment_card',
+    task: 'discard_equipment_card',
     description: 'Select an equipment card to discard',
     tooltip: 'Discard this equipment card',
   });
@@ -101,15 +118,71 @@ export function discardSelectedEquipmentCard(
   state: GameState,
   selection: Selection
 ) {
-  // Find the card.
+  // Remove it from the player.
   const selected = selection.selected[0]!;
   const player = getPlayer(state, selected.owner!)!;
-  const card = player.equipment.filter(c => c.id === selected.id)[0]!;
-
-  // Remove it from the player.
-  player.equipment = player.equipment.filter(c => c !== card);
+  const card = removeItemWithId(player.equipment, selection.id)!;
 
   // Add it back to the supply.
+  addEquipmentToSupply(state, card);
+}
+
+/**
+ * Causes the selected player to play the equipment card.
+ */
+export function playEquipment(
+  state: GameState,
+  options: {player: number; card: number}
+) {
+  // Verify another equipment card isn't already in play.
+  const player = getPlayer(state, options.player);
+  const turn = state.shared.turn;
+  if (!player || turn.unresolvedEquipment) {
+    return;
+  }
+
+  // Remove the card from the player.
+  const card = removeItemWithId(player.equipment, options.card);
+  if (!card) {
+    return;
+  }
+
+  // Lookup the configuration for how this card should work.
+  const config = getEquipmentConfig(card.type);
+  if (!config) {
+    // unsupported
+    return;
+  }
+
+  // Verify the card works in this situation.
+  if (!config.canPlay(state, player.id)) {
+    return;
+  }
+
+  // Put the card into play.
+  card.state = CardState.FACE_UP;
+  turn.unresolvedEquipment = {
+    player: player.id,
+    card,
+  };
+
+  // Play!
+  const result = config.play(state, player.id);
+
+  // Some cards (rarely) can be resolved immediately after being played.
+  // If so, mark it as resolved.
+  if (result === EquipmentCardResult.DONE) {
+    turn.unresolvedEquipment = undefined;
+    addEquipmentToSupply(state, card);
+  } else if (result === EquipmentCardResult.PLACED) {
+    turn.unresolvedEquipment = undefined;
+  }
+}
+
+/**
+ * Adds an equipment card back to the bottom of the equipment card deck.
+ */
+function addEquipmentToSupply(state: GameState, card: EquipmentCard) {
   card.state = CardState.FACE_DOWN;
   state.shared.equipment.unshift(card);
 }
@@ -318,7 +391,7 @@ export function requirePlayerToRevealAnIntegrityCard(
     },
     numToSelect: 1,
     selected: [],
-    task: 'general.reveal_integrity_card',
+    task: 'reveal_integrity_card',
     description: 'Select an integrity card to reveal',
     tooltip: 'Reveal this integrity card',
   };
@@ -343,19 +416,71 @@ export function revealSelectedIntegrityCard(
   }
 }
 
-/**
- * Handle the user completing a selection related to their turn.
- */
-export function onGeneralSelection(
-  state: GameState,
-  tasks: string[],
-  selection: Selection
-) {
-  const task = tasks.shift()!;
+export function selectItem(state: GameState, item: GameItem) {
+  // TODO: For debugging, I just route it to the first selection
+  // on the stack. This should really go to state.local.player.
+  const player = getCurrentPlayer(state)!;
+  const selections = state.shared.selections;
+  // const selection = selections.filter(s => s.player === player.id)[0];
+  const selection = selections[0];
+
+  if (!selection) {
+    return;
+  }
+
+  selection.selected.push(item);
+
+  // Are all items selected?
+  if (selection.selected.length < selection.numToSelect) {
+    return;
+  }
+
+  // Remove the selection
+  state.shared.selections = state.shared.selections.filter(
+    s => s.id !== selection.id
+  );
+
+  // Route it to be handled.
+  const tasks = selection.task.split('.');
+  const task = tasks.shift();
 
   if (task === 'reveal_integrity_card') {
     revealSelectedIntegrityCard(state, selection);
   } else if (task === 'discard_equipment_card') {
     discardSelectedEquipmentCard(state, selection);
+  } else if (task === 'equipment') {
+    handleEquipmentCardSelection(state, selection, tasks);
+  }
+}
+
+/**
+ * Handle item selections that should be routed to an equipment
+ * card configurtion.
+ */
+export function handleEquipmentCardSelection(
+  state: GameState,
+  selection: Selection,
+  tasks: string[]
+) {
+  const subtask = tasks[1];
+  const turn = state.shared.turn;
+
+  const card = state.shared.turn.unresolvedEquipment?.card;
+  if (!card) {
+    return;
+  }
+
+  const config = getEquipmentConfig(card.type);
+  if (!config || !config.onSelect) {
+    return;
+  }
+
+  const result = config.onSelect(state, selection, subtask);
+
+  if (result === EquipmentCardResult.DONE) {
+    turn.unresolvedEquipment = undefined;
+    addEquipmentToSupply(state, card);
+  } else if (result === EquipmentCardResult.PLACED) {
+    turn.unresolvedEquipment = undefined;
   }
 }

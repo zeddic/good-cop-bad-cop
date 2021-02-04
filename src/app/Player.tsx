@@ -2,7 +2,12 @@ import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Player as PlayerModel} from '../game/models';
-import {selectAimablePlayers, selectCurrentPlayer} from '../game/selectors';
+import {
+  selectActiveSelection,
+  selectAimablePlayers,
+  selectCurrentPlayer,
+  selectSelectableItems,
+} from '../game/selectors';
 import {EquipmentCard} from './EquipmentCard';
 import {Gun} from './Gun';
 import {IntegrityCard} from './IntegrityCard';
@@ -17,16 +22,30 @@ export function Player(props: {player: PlayerModel}) {
   const dispatch = useDispatch();
   const currentPlayer = useSelector(selectCurrentPlayer);
   const canAimAt = useSelector(selectAimablePlayers).has(player.id);
+  const selectable = useSelector(selectSelectableItems).players;
+  const activeSelection = useSelector(selectActiveSelection);
+
+  const isSelectable = selectable.has(player.id);
   const wounds = new Array(player.wounds).fill(null).map((_, i) => i);
 
   const classNames = [
     'player',
+    isSelectable ? 'selectable' : '',
     currentPlayer.id === player.id ? 'current' : '',
     player.dead ? 'dead' : '',
   ];
 
   function onAimAtClicked() {
     dispatch(gameSlice.actions.aimGun(player.id));
+  }
+
+  function onSelectClicked() {
+    const item = selectable.get(player.id)!;
+    dispatch(gameSlice.actions.select(item));
+  }
+
+  function getSelectTooltip() {
+    return activeSelection?.tooltip || 'Select this integrity card';
   }
 
   return (
@@ -36,6 +55,15 @@ export function Player(props: {player: PlayerModel}) {
         {canAimAt && (
           <button className="btn" onClick={onAimAtClicked}>
             Aim at
+          </button>
+        )}
+        {isSelectable && (
+          <button
+            className="btn"
+            onClick={onSelectClicked}
+            title={getSelectTooltip()}
+          >
+            Select
           </button>
         )}
       </h3>
