@@ -1,18 +1,20 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
-import {Team} from '../game/models';
+import {CardState, Team} from '../game/models';
 import {
   selectActiveSelection,
   selectCanEndTurn,
   selectCanFireGun,
   selectCanSkipActionStage,
+  selectEquipment,
   selectGunSupply,
   selectPlayers,
   selectTurn,
   selectWinner,
 } from '../game/selectors';
 import './App.scss';
+import {EquipmentCard} from './EquipmentCard';
 import {Gun} from './Gun';
 import {Player} from './Player';
 
@@ -20,6 +22,7 @@ function App() {
   const turn = useSelector(selectTurn);
   const players = useSelector(selectPlayers);
   const gunSupply = useSelector(selectGunSupply);
+  const equipment = useSelector(selectEquipment);
   const activeSelection = useSelector(selectActiveSelection);
   const canEndTurn = useSelector(selectCanEndTurn);
   const canSkipActionStage = useSelector(selectCanSkipActionStage);
@@ -92,6 +95,10 @@ function App() {
       <h2>Supply</h2>
       {gunSupply.map(gun => (
         <Gun key={gun.id} gun={gun}></Gun>
+      ))}
+
+      {equipment.map(card => (
+        <EquipmentCard key={card.id} card={card}></EquipmentCard>
       ))}
     </div>
   );

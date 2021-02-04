@@ -3,12 +3,14 @@ import {
   GameState,
   Gun,
   IntegrityCard,
-  IntegrityCardState,
+  CardState,
   IntegrityCardType,
   Player,
   SharedGameState,
   TurnDirection,
   TurnStage,
+  EquipmentCard,
+  EquipmentCardType,
 } from './models';
 
 export function setupGame(numPlayers: number): GameState {
@@ -29,7 +31,7 @@ export function createSharedState(numPlayers: number): SharedGameState {
     players: indexPlayersById(players),
     order: players.map(p => p.id),
     guns: createGunsForPlayers(numPlayers),
-    equipment: [],
+    equipment: buildEquipmentDeck(),
     selections: [],
     visibility: [],
     turnDirection: TurnDirection.CLOCKWISE,
@@ -128,7 +130,7 @@ function createIntegrityCard(type: IntegrityCardType): IntegrityCard {
   return {
     id: cardIdGen++,
     type,
-    state: IntegrityCardState.FACE_DOWN,
+    state: CardState.FACE_DOWN,
   };
 }
 
@@ -156,6 +158,28 @@ export function buildIntegrityDeck(numPlayers: number): IntegrityCardType[] {
   deck.unshift(IntegrityCardType.AGENT);
   deck.unshift(IntegrityCardType.KING_PIN);
   return deck;
+}
+
+/**
+ * Builds equipment cards
+ */
+export function buildEquipmentDeck(): EquipmentCard[] {
+  const types = Object.values(EquipmentCardType);
+  const cards: EquipmentCard[] = [];
+  let id = 1;
+
+  // Just give all the cards. The offical gives
+  // different cards for different game sizes, but I prefer
+  // the randomness.
+  for (const type of types) {
+    cards.push({
+      id: id++,
+      type,
+      state: CardState.FACE_DOWN,
+    });
+  }
+
+  return shuffle(cards);
 }
 
 /**

@@ -9,7 +9,7 @@ import {
   GameItemType,
   GameStage,
   GameState,
-  IntegrityCardState,
+  CardState,
   Query,
   Selection,
   Team,
@@ -173,8 +173,8 @@ export function resolveGunShot(state: GameState) {
 
   // Turn their integrity cards face up
   for (const card of target.integrityCards) {
-    if (card.state === IntegrityCardState.FACE_DOWN) {
-      card.state = IntegrityCardState.FACE_UP;
+    if (card.state === CardState.FACE_DOWN) {
+      card.state = CardState.FACE_UP;
     }
   }
 
@@ -281,7 +281,7 @@ export function revealSelectedIntegrityCard(
   const card = player.integrityCards.filter(c => c.id === selected.id);
 
   if (card.length === 1) {
-    card[0].state = IntegrityCardState.FACE_UP;
+    card[0].state = CardState.FACE_UP;
   }
 }
 

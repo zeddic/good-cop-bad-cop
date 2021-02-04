@@ -46,6 +46,8 @@ export function selectPlayer(id?: number) {
 
 export const selectGunSupply = createSelector(selectShared, s => s.guns);
 
+export const selectEquipment = createSelector(selectShared, s => s.equipment);
+
 export const selectVisibility = createSelector(selectShared, s => s.visibility);
 
 export const selectVisibleIntegrityCards = createSelector(

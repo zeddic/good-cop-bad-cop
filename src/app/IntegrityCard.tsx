@@ -3,7 +3,7 @@ import {gameSlice} from '../game/game_store.ts';
 import {
   Player as PlayerModel,
   IntegrityCard as IntegrityCardModel,
-  IntegrityCardState,
+  CardState,
   IntegrityCardType,
 } from '../game/models';
 import {
@@ -21,7 +21,7 @@ export function IntegrityCard(props: {
 }) {
   const card = props.card;
   const owner = props.owner;
-  const isFaceUp = card.state === IntegrityCardState.FACE_UP;
+  const isFaceUp = card.state === CardState.FACE_UP;
 
   const dispatch = useDispatch();
   const visibleCards = useSelector(selectVisibleIntegrityCards);

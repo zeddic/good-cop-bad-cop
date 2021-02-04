@@ -1,5 +1,5 @@
 import {
-  IntegrityCardState,
+  CardState,
   IntegrityCardType,
   Player,
   GameItemType,
@@ -22,7 +22,7 @@ const GOOD = IntegrityCardType.GOOD;
 const BAD = IntegrityCardType.BAD;
 const KING_PIN = IntegrityCardType.KING_PIN;
 const AGENT = IntegrityCardType.AGENT;
-const FACE_UP = IntegrityCardState.FACE_UP;
+const FACE_UP = CardState.FACE_UP;
 
 let player1: Player;
 let player2: Player;

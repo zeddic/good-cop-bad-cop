@@ -3,7 +3,7 @@ import {getPlayer} from './common_utils';
 import {
   GameStage,
   GameState,
-  IntegrityCardState,
+  CardState,
   IntegrityCardType,
   TurnDirection,
   TurnStage,
@@ -18,8 +18,8 @@ const GOOD = IntegrityCardType.GOOD;
 const BAD = IntegrityCardType.BAD;
 const KING_PIN = IntegrityCardType.KING_PIN;
 const AGENT = IntegrityCardType.AGENT;
-const FACE_UP = IntegrityCardState.FACE_UP;
-const FACE_DOWN = IntegrityCardState.FACE_DOWN;
+const FACE_UP = CardState.FACE_UP;
+const FACE_DOWN = CardState.FACE_DOWN;
 
 describe('shooting players', () => {
   let state: GameState;

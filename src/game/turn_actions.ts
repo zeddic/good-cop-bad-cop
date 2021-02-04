@@ -10,7 +10,7 @@ import {getCurrentPlayer} from './common_utils';
 import {
   GameStage,
   GameState,
-  IntegrityCardState,
+  CardState,
   Selection,
   TurnDirection,
   TurnStage,
@@ -191,7 +191,7 @@ export function turnRevealIntegrityCard(
   const card = player.integrityCards.filter(c => c.id === selected.id);
 
   if (card.length === 1) {
-    card[0].state = IntegrityCardState.FACE_UP;
+    card[0].state = CardState.FACE_UP;
   }
 }
 

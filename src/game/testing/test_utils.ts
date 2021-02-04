@@ -1,7 +1,7 @@
 import {
   Gun,
   IntegrityCard,
-  IntegrityCardState,
+  CardState,
   IntegrityCardType,
   Player,
   GameItemType,
@@ -38,11 +38,11 @@ let cardIdGen = 1;
  */
 export function createIntegrityCard(options: {
   type?: IntegrityCardType;
-  state?: IntegrityCardState;
+  state?: CardState;
   id?: number;
 }): IntegrityCard {
   const id = options.id || cardIdGen++;
-  const state = options.state || IntegrityCardState.FACE_DOWN;
+  const state = options.state || CardState.FACE_DOWN;
   const type = options.type || IntegrityCardType.GOOD;
   return {id, type, state};
 }
@@ -58,6 +58,7 @@ export function createEquipmentCard(
   return {
     type: options.type || EquipmentCardType.TRUTH_SERUM,
     id: options.id || equipmentIdGen++,
+    state: CardState.FACE_DOWN,
   };
 }
 

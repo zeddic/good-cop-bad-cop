@@ -3,7 +3,7 @@ import {
   EquipmentCard,
   Gun,
   IntegrityCard,
-  IntegrityCardState,
+  CardState,
   IsPlayer,
   Player,
   GameItemType,
@@ -134,8 +134,8 @@ function matchesIntegrityCard(
         break;
       case 'is_face_down':
         const expected = filter.isFaceDown
-          ? IntegrityCardState.FACE_DOWN
-          : IntegrityCardState.FACE_UP;
+          ? CardState.FACE_DOWN
+          : CardState.FACE_UP;
         if (card.state !== expected) {
           return false;
         }

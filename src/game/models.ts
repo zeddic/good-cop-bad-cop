@@ -120,7 +120,7 @@ export interface Gun {
 export interface IntegrityCard {
   id: number;
   type: IntegrityCardType;
-  state: IntegrityCardState;
+  state: CardState;
 }
 
 export enum IntegrityCardType {
@@ -130,7 +130,7 @@ export enum IntegrityCardType {
   KING_PIN = 'king_pin',
 }
 
-export enum IntegrityCardState {
+export enum CardState {
   FACE_UP = 'face_up',
   FACE_DOWN = 'face_down',
 }
@@ -138,12 +138,29 @@ export enum IntegrityCardState {
 export interface EquipmentCard {
   id: number;
   type: EquipmentCardType;
+  state: CardState;
 }
 
-// TODO: Fill out equipment types as extension system
-// filled in.
 export enum EquipmentCardType {
+  // Easier to implement
   TRUTH_SERUM = 'truth_serum',
+  POLYGRAPH = 'polygraph',
+  BLACKMAIL = 'blackmail',
+  REPORT_AUDIT = 'report_audit',
+  METAL_DETECTOR = 'metal_detector',
+  COFFEE = 'coffee',
+  SMOKE_GRENADe = 'smoke_grenade',
+  WIRETAP = 'wiretap',
+  EVIDENCE_BAG = 'evidence_bag',
+  TASER = 'taser',
+  DEFIBRILLATOR = 'defibrillator',
+
+  // Harder to implement
+  FLASHBANG = 'flashbang',
+  K9_UNIT = 'k9_unit',
+  SURVEILLANCE_CAMERA = 'surveillance_camera',
+  PLANTED_EVIDENCE = 'planted_evidence',
+  RESTRAINING_ORDER = 'restraining_order',
 }
 
 /**

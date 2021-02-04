@@ -1,0 +1,87 @@
+$border-size: 3px;
+$width: 312px / 4;
+$height: 462px / 4;
+
+
+@mixin background($type) {
+  &.#{$type} {
+    background-image: url('assets/equipment/#{$type}.png');
+  }
+}
+
+.equipment-card {
+  display: inline-block;
+  width: $width;
+  height: $height;
+
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: ($width - $border-size * 2) ($height - $border-size * 2 + 1);
+  border-radius: 8px;
+  border: $border-size solid #fff;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, .5);
+  box-sizing: border-box;
+  margin: 0 4px 4px 0;
+
+  outline-color: rgb(41, 126, 255);
+  vertical-align: middle;
+
+
+  @include background('truth_serum');
+  @include background('polygraph');
+  @include background('blackmail');
+  @include background('report_audit');
+  @include background('metal_detector');
+  @include background('coffee');
+  @include background('smoke_grenade');
+  @include background('wiretap');
+  @include background('evidence_bag');
+  @include background('taser');
+  @include background('defibrillator');
+  @include background('flashbang');
+  @include background('k9_unit');
+  @include background('surveillance_camera');
+  @include background('planted_evidence');
+  @include background('restraining_order');
+
+  &.face_down:not(.forced-visible) {
+    background-image: url('assets/equipment/equipment.png');
+    border-color: transparent;
+    background-size: $width $height;
+  }
+
+  position: relative;
+  &.forced-visible::after {
+    content: '';
+    position: absolute;
+    background-image: url('assets/visibility.png');
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    opacity: .7;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: 50px 50px;
+  }
+
+  &.clickable.clickable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: blue;
+    }
+  }
+
+  &.selectable.selectable {
+    border-color: rgb(199, 0, 0);
+  }
+
+  &.face_up {
+    &:hover {
+      transform: scale(3);
+      z-index: 2;
+    }
+  }
+}
+
