@@ -1,5 +1,5 @@
-import {aimGun, fireGun, pickupGun, resolveGunShot} from './actions';
-import {getPlayer} from './common_utils';
+import {getPlayer} from './utils';
+import {aimGun, fireGun, pickupGun, resolveGunShot} from './guns';
 import {
   GameStage,
   GameState,

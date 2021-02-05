@@ -1,5 +1,5 @@
 import {createSelector} from 'reselect';
-import {getEquipmentConfig} from './equipment';
+import {getEquipmentConfig} from './equipment_config';
 import {GameItemType, GameStage, GameState, Player, TurnStage} from './models';
 import {findItemsAmongPlayers, findSelectableItems} from './queries';
 

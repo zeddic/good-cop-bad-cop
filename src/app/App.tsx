@@ -1,19 +1,19 @@
-import React, {ChangeEvent, ChangeEventHandler} from 'react';
+import React, {ChangeEvent} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Team} from '../game/models';
 import {
-  selectLocalSelection,
   selectCanEndTurn,
   selectCanFireGun,
   selectCanSkipActionStage,
+  selectDebug,
   selectEquipment,
   selectGunSupply,
+  selectLocalPlayer,
+  selectLocalSelection,
   selectPlayers,
   selectTurn,
   selectWinner,
-  selectDebug,
-  selectLocalPlayer,
 } from '../game/selectors';
 import './App.scss';
 import {EquipmentCard} from './EquipmentCard';

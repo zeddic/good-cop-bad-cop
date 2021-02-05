@@ -1,4 +1,4 @@
-import {getPlayers} from './common_utils';
+import {getPlayers} from './utils';
 import {
   EquipmentCard,
   Gun,

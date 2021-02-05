@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {playEquipment, selectItem} from './actions';
+import {playEquipment} from './equipment';
 import {
   GameItem,
   GameStage,
@@ -7,7 +7,7 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
-import {selectLocalSelection} from './selectors';
+import {selectItem} from './selections';
 import {setupGame} from './setup';
 import {
   emulatePlayer,
@@ -19,7 +19,7 @@ import {
   turnPickupEquipment,
   turnPickupGun,
   turnResolveGunShot,
-} from './turn_actions';
+} from './turns';
 
 const INITIAL_STATE: GameState = {
   local: {

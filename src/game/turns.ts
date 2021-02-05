@@ -1,13 +1,4 @@
-import {
-  aimGun,
-  fireGun,
-  investigatePlayer,
-  pickupEquipment,
-  pickupGun,
-  requirePlayerToRevealAnIntegrityCard,
-  resolveGunShot,
-} from './actions';
-import {getCurrentPlayer} from './common_utils';
+import {getCurrentPlayer} from './utils';
 import {
   GameStage,
   GameState,
@@ -16,6 +7,12 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
+import {pickupEquipment} from './equipment';
+import {pickupGun, aimGun, fireGun, resolveGunShot} from './guns';
+import {
+  investigatePlayer,
+  requirePlayerToRevealAnIntegrityCard,
+} from './integrity_cards';
 
 /**
  * Has the current player investigate another player.

@@ -7,7 +7,7 @@ import {
   TurnStage,
 } from './models';
 import {createGuns, createPlayer} from './testing/test_utils';
-import {endTurn} from './turn_actions';
+import {endTurn} from './turns';
 
 describe('ending turns', () => {
   let state: GameState;

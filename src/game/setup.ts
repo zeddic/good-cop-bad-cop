@@ -1,4 +1,4 @@
-import {getEquipmentConfig} from './equipment';
+import {getEquipmentConfig} from './equipment_config';
 import {
   GameStage,
   GameState,
