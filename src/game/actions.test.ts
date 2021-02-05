@@ -28,6 +28,7 @@ describe('shooting players', () => {
     state = {
       local: {
         player: 0,
+        debug: false,
       },
       shared: {
         players: {

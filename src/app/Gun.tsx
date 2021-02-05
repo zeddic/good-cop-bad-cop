@@ -2,7 +2,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Gun as GunModel, Player as PlayerModel} from '../game/models';
 import {
-  selectActiveSelection,
+  selectLocalSelection,
   selectCanArmGun,
   selectFirableGunId,
   selectPlayer,
@@ -22,7 +22,7 @@ export function Gun(props: {
   const dispatch = useDispatch();
   const selectable = useSelector(selectSelectableItems).guns;
   const target = useSelector(selectPlayer(gun.aimedAt));
-  const activeSelection = useSelector(selectActiveSelection);
+  const activeSelection = useSelector(selectLocalSelection);
   const isFireable = useSelector(selectFirableGunId) === gun.id;
   const isEquipable = useSelector(selectCanArmGun) && inSupply;
   const isSelectable = selectable.has(gun.id);

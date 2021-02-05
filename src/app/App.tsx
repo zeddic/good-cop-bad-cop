@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {ChangeEvent, ChangeEventHandler} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Team} from '../game/models';
 import {
-  selectActiveSelection,
+  selectLocalSelection,
   selectCanEndTurn,
   selectCanFireGun,
   selectCanSkipActionStage,
@@ -12,6 +12,8 @@ import {
   selectPlayers,
   selectTurn,
   selectWinner,
+  selectDebug,
+  selectLocalPlayer,
 } from '../game/selectors';
 import './App.scss';
 import {EquipmentCard} from './EquipmentCard';
@@ -21,13 +23,16 @@ import {Player} from './Player';
 function App() {
   const turn = useSelector(selectTurn);
   const players = useSelector(selectPlayers);
+  const localPlayer = useSelector(selectLocalPlayer);
   const gunSupply = useSelector(selectGunSupply);
   const equipment = useSelector(selectEquipment)[0];
-  const activeSelection = useSelector(selectActiveSelection);
+  const activeSelection = useSelector(selectLocalSelection);
   const canEndTurn = useSelector(selectCanEndTurn);
   const canSkipActionStage = useSelector(selectCanSkipActionStage);
   const canFireGun = useSelector(selectCanFireGun);
   const winner = useSelector(selectWinner);
+  const debug = useSelector(selectDebug);
+
   const unresolvedShot = turn.unresolvedGunShot;
 
   const dispatch = useDispatch();
@@ -46,6 +51,11 @@ function App() {
 
   function resolveGunShot() {
     dispatch(gameSlice.actions.resolveGunShot());
+  }
+
+  function emulatePlayer(event: ChangeEvent<HTMLSelectElement>) {
+    const player = Number.parseInt(event.target.value);
+    dispatch(gameSlice.actions.emulatePlayer(player));
   }
 
   return (
@@ -71,6 +81,19 @@ function App() {
           <button className="btn" onClick={skipActionStage}>
             Skip Action
           </button>
+        )}
+
+        {debug && (
+          <>
+            Emulate:
+            <select value={localPlayer.id} onChange={emulatePlayer}>
+              {players.map(player => (
+                <option key={player.id} value={player.id}>
+                  {player.name} ({player.id})
+                </option>
+              ))}
+            </select>
+          </>
         )}
 
         {winner && (

@@ -7,8 +7,10 @@ import {
   TurnDirection,
   TurnStage,
 } from './models';
+import {selectLocalSelection} from './selectors';
 import {setupGame} from './setup';
 import {
+  emulatePlayer,
   endTurn,
   finishActionStage,
   turnAimGun,
@@ -76,6 +78,9 @@ export const gameSlice = createSlice({
     },
     select: (state, action: PayloadAction<GameItem>) => {
       selectItem(state, action.payload);
+    },
+    emulatePlayer: (state, action: PayloadAction<number>) => {
+      emulatePlayer(state, action.payload);
     },
   },
 });

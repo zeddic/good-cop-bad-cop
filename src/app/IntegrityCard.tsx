@@ -7,7 +7,7 @@ import {
   IntegrityCardType,
 } from '../game/models';
 import {
-  selectActiveSelection,
+  selectLocalSelection,
   selectInvestigatableCards,
   selectSelectableItems,
   selectVisibleIntegrityCards,
@@ -27,7 +27,7 @@ export function IntegrityCard(props: {
   const visibleCards = useSelector(selectVisibleIntegrityCards);
   const investigatable = useSelector(selectInvestigatableCards);
   const selectable = useSelector(selectSelectableItems).integrityCards;
-  const activeSelection = useSelector(selectActiveSelection);
+  const activeSelection = useSelector(selectLocalSelection);
 
   const isInvestigatable = investigatable.has(card.id);
   const isSelectable = selectable.has(card.id);

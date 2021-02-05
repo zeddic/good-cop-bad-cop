@@ -1,19 +1,48 @@
-import {current} from 'immer';
 import {createSelector} from 'reselect';
 import {getEquipmentConfig} from './equipment';
 import {GameItemType, GameStage, GameState, Player, TurnStage} from './models';
 import {findItemsAmongPlayers, findSelectableItems} from './queries';
 
-export function selectGame(rootState: any): GameState {
+export function selectGame(rootState: {game: GameState}): GameState {
   return rootState.game;
 }
 
 export const selectShared = createSelector(selectGame, g => g.shared);
 
+export const selectLocal = createSelector(selectGame, g => g.local);
+
+export const selectDebug = createSelector(selectLocal, s => s.debug);
+
+/**
+ * The player who is playing their turn now.
+ */
 export const selectCurrentPlayer = createSelector(selectShared, state => {
   const active = state.turn.activePlayer;
   return state.players[active];
 });
+
+/**
+ * The player who this local instance of the game is running for.
+ */
+export const selectLocalPlayer = createSelector(
+  selectShared,
+  selectLocal,
+  (shared, local) => {
+    return shared.players[local.player];
+  }
+);
+
+/**
+ * Whether it is the local players turn.
+ * In this situation, currentPlayer === localPlayer.
+ */
+export const selectIsLocalPlayersTurn = createSelector(
+  selectLocalPlayer,
+  selectCurrentPlayer,
+  (localPlayer, currentPlayer) => {
+    return localPlayer.id === currentPlayer.id;
+  }
+);
 
 export const selectTurn = createSelector(selectShared, s => s.turn);
 
@@ -52,22 +81,24 @@ export const selectEquipment = createSelector(selectShared, s => s.equipment);
 export const selectVisibility = createSelector(selectShared, s => s.visibility);
 
 export const selectVisibleIntegrityCards = createSelector(
-  selectCurrentPlayer,
+  selectLocalPlayer,
   selectVisibility,
-  (currentPlayer, visibility) => {
+  (localPlayer, visibility) => {
     const visible = new Set<number>();
 
+    // Granted visibility
     for (const view of visibility) {
-      for (let item of view.items) {
-        if (item.type === GameItemType.INTEGRITY_CARD) {
-          visible.add(item.id!);
+      if (view.player === localPlayer.id) {
+        for (let item of view.items) {
+          if (item.type === GameItemType.INTEGRITY_CARD) {
+            visible.add(item.id!);
+          }
         }
       }
     }
 
-    // todo: this should be signed in player
-    // Players can always view their own cards, even if others cannot
-    for (const card of currentPlayer.integrityCards) {
+    // Players can always view their own cards
+    for (const card of localPlayer.integrityCards) {
       visible.add(card.id);
     }
 
@@ -76,22 +107,24 @@ export const selectVisibleIntegrityCards = createSelector(
 );
 
 export const selectVisibleEquipmentCards = createSelector(
-  selectCurrentPlayer,
+  selectLocalPlayer,
   selectVisibility,
-  (currentPlayer, visibility) => {
+  (localPlayer, visibility) => {
     const visible = new Set<number>();
 
-    // Any forced visibility.
+    // Granted visibility
     for (const view of visibility) {
-      for (let item of view.items) {
-        if (item.type === GameItemType.EQUIPMENT_CARD) {
-          visible.add(item.id!);
+      if (view.player === localPlayer.id) {
+        for (let item of view.items) {
+          if (item.type === GameItemType.EQUIPMENT_CARD) {
+            visible.add(item.id!);
+          }
         }
       }
     }
 
     // Players can always view their own cards
-    for (const card of currentPlayer.equipment) {
+    for (const card of localPlayer.equipment) {
       visible.add(card.id);
     }
 
@@ -107,58 +140,54 @@ export const selectVisibleEquipmentCards = createSelector(
 export const selectSelections = createSelector(selectShared, s => s.selections);
 
 /**
- * Selects the first selection that the current player must complete.
- * Returns undefined if there is no pending selection.
+ * Gets the first selection that the local player is responsible for
+ * resolving. Returns undefined if the local player doesn't need to do
+ * anything.
+ *
+ * Note that there could still be other selections pending that other
+ * players must still complete.
  */
-export const selectActiveSelection = createSelector(
+export const selectLocalSelection = createSelector(
   selectSelections,
-  selectCurrentPlayer,
-  (selections, currentPlayer) => {
-    return selections[0]; // <-- debugging
-    // return selections.filter(s => s.player === currentPlayer.id)[0];
+  selectLocalPlayer,
+  selectDebug,
+  (selections, localPlayer, debug) => {
+    return selections.filter(s => s.player === localPlayer.id)[0];
   }
 );
 
 /**
- * Selects if there is a pending selection the current player must address
- * before progressing the game.
- */
-export const selectIsActiveSelection = createSelector(
-  selectActiveSelection,
-  a => !!a
-);
-
-/**
  * Selects a structure that contains a Sets identifying any items that
- * passed the firsts of the currently active selection and may be
- * picked by the user.
+ * the local player may pick from to fufill any active localSelection.
  */
 export const selectSelectableItems = createSelector(
-  selectActiveSelection,
+  selectLocalSelection,
   selectPlayers,
   findSelectableItems
 );
 
 /**
- * Returns whether the current player can take any action-hase
+ * Returns whether the local player can take any action-phase
  * action (fire a gun, investigate, equip)
  */
 export const selectCanTakeAction = createSelector(
   selectTurn,
-  selectActiveSelection,
-  (turn, activeSelection) => {
+  selectIsLocalPlayersTurn,
+  selectSelections,
+  (turn, isLocalPlayersTurn, selections) => {
     return (
+      isLocalPlayersTurn &&
       turn.stage === TurnStage.TAKE_ACTION &&
       turn.actionsLeft > 0 &&
       !turn.unresolvedGunShot &&
       !turn.unresolvedEquipment &&
-      !activeSelection
+      selections.length === 0
     );
   }
 );
 
 /**
- * Returns true if the user can arm a gun.
+ * True if the player can arm a gun.
  */
 export const selectCanArmGun = createSelector(
   selectCanTakeAction,
@@ -169,8 +198,7 @@ export const selectCanArmGun = createSelector(
 );
 
 /**
- * Whether the current player can fire their gun.
- * False if they don't have a gun equiped.
+ * True if the player can fire a gun that they have armed.
  */
 export const selectCanFireGun = createSelector(
   selectCanTakeAction,
@@ -181,7 +209,7 @@ export const selectCanFireGun = createSelector(
 );
 
 /**
- * Whether the current player can equip a card.
+ * True if a player can pick up new equipment.
  */
 export const selectCanEquip = createSelector(
   selectCanTakeAction,
@@ -192,25 +220,30 @@ export const selectCanEquip = createSelector(
 );
 
 /**
- * Whether the current player may play their active equipment.
+ * Whether the local player can play their equipment card.
+ *
+ * Note, this check is a little different from the other checks.
+ * Most actions can only be performed on your turn. In most cases
+ * equipment can be played at any time. As a result, we check
+ * 'localPlayer' which may be different from the current turn player.
  */
 export const selectCanPlayEquipment = createSelector(
   selectGame,
   selectTurn,
-  selectActiveSelection,
-  selectCurrentPlayer,
-  (state, turn, activeSelection, currentPlayer) => {
+  selectSelections,
+  selectLocalPlayer,
+  (state, turn, selections, localPlayer) => {
     if (
       turn.unresolvedEquipment ||
-      activeSelection ||
-      currentPlayer.equipment.length !== 1
+      selections.length > 0 ||
+      localPlayer.equipment.length !== 1
     ) {
       return false;
     }
 
-    const card = currentPlayer.equipment[0]!;
+    const card = localPlayer.equipment[0]!;
     const config = getEquipmentConfig(card.type);
-    return config && config.canPlay(state, currentPlayer.id);
+    return config && config.canPlay(state, localPlayer.id);
   }
 );
 
@@ -219,10 +252,12 @@ export const selectCanPlayEquipment = createSelector(
  */
 export const selectCanEndTurn = createSelector(
   selectTurn,
+  selectIsLocalPlayersTurn,
   selectSelections,
   selectGameStage,
-  (turn, selections, stage) => {
+  (turn, isLocalPlayersTurn, selections, stage) => {
     return (
+      isLocalPlayersTurn &&
       !turn.unresolvedGunShot &&
       !turn.unresolvedEquipment &&
       selections.length === 0 &&
@@ -237,14 +272,18 @@ export const selectCanEndTurn = createSelector(
  */
 export const selectCanSkipActionStage = createSelector(
   selectTurn,
+  selectIsLocalPlayersTurn,
   selectCurrentPlayer,
-  selectActiveSelection,
-  (turn, currentPlayer, selection) => {
+  selectLocalSelection,
+  (turn, isLocalPlayersTurn, currentPlayer, selection) => {
     // The only point of allowing a user to skip the action phase is if they
     // want to aim their gun. Otherwise, its equivalent to skipping their turn.
     // So if a user doesn't have a gun, we just don't bother given them the option.
     return (
-      turn.stage === TurnStage.TAKE_ACTION && currentPlayer.gun && !selection
+      isLocalPlayersTurn &&
+      turn.stage === TurnStage.TAKE_ACTION &&
+      currentPlayer.gun &&
+      !selection
     );
   }
 );
@@ -254,14 +293,19 @@ export const selectCanSkipActionStage = createSelector(
  * current player.
  */
 export const selectAimablePlayers = createSelector(
+  selectIsLocalPlayersTurn,
   selectTurn,
   selectCurrentPlayer,
   selectPlayers,
-  selectActiveSelection,
-  (turn, currentPlayer, players, activeSelection) => {
+  selectLocalSelection,
+  (isLocalPlayersTurn, turn, currentPlayer, players, activeSelection) => {
     const aimable = new Set<number>();
 
-    if (turn.stage !== TurnStage.TAKE_AIM || !!activeSelection) {
+    if (
+      !isLocalPlayersTurn ||
+      turn.stage !== TurnStage.TAKE_AIM ||
+      !!activeSelection
+    ) {
       return aimable;
     }
 
@@ -319,13 +363,15 @@ export const selectFirableGunId = createSelector(
 );
 
 /**
- * Returns the id an equipment card the current player may fire.
- * Returns undefined if they can fire nothing.
+ * Returns the id an equipment card the local player may play.
+ * Note that unlike other checks, this is based off of 'localPlayer'
+ * and not 'currentPlayer'. That is because equipment, unlike other
+ * actions, can be done when it is not your turn.
  */
 export const selectPlaybleEquipmentId = createSelector(
   selectCanPlayEquipment,
-  selectCurrentPlayer,
-  (canPlay, currentPlayer) => {
-    return canPlay ? currentPlayer.equipment[0]!.id : undefined;
+  selectLocalPlayer,
+  (canPlay, localPlayer) => {
+    return canPlay ? localPlayer.equipment[0]!.id : undefined;
   }
 );

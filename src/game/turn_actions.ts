@@ -165,6 +165,14 @@ export function endTurn(state: GameState) {
     stage: TurnStage.TAKE_ACTION,
     actionsLeft: 1,
   };
+
+  if (state.local.debug) {
+    emulatePlayer(state, nextPlayer);
+  }
+}
+
+export function emulatePlayer(state: GameState, player: number) {
+  state.local.player = player;
 }
 
 /**
@@ -210,30 +218,14 @@ export function turnRevealIntegrityCard(
   }
 }
 
-/**
- * Handle the user completing a selection related to their turn.
- */
-export function turnHandleSelection(
-  state: GameState,
-  tasks: string[],
-  selection: Selection
-) {
-  const task = tasks.shift()!;
-
-  if (task === 'reveal_integrity_card') {
-    turnRevealIntegrityCard(state, selection);
-  } else if (task === 'discard_equipment') {
-    // todo
-  }
-}
-
 // UTILITY FUNCTIONS
 
 /**
  * Returns true if the current player can take an action still.
  */
-export function canTakeAction(state: GameState) {
+function canTakeAction(state: GameState) {
   return (
+    state.local.player === state.shared.turn.activePlayer &&
     state.shared.turn.stage === TurnStage.TAKE_ACTION &&
     state.shared.turn.actionsLeft > 0
   );
@@ -255,7 +247,7 @@ export function finishActionStage(state: GameState) {
   }
 }
 
-export function findDeadPlayers(state: GameState): Set<number> {
+function findDeadPlayers(state: GameState): Set<number> {
   const deadIds = state.shared.order.filter(playerId => {
     return !!state.shared.players[playerId]?.dead;
   });

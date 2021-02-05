@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store.ts';
 import {Player as PlayerModel} from '../game/models';
 import {
-  selectActiveSelection,
+  selectLocalSelection,
   selectAimablePlayers,
   selectCurrentPlayer,
   selectSelectableItems,
@@ -23,7 +23,7 @@ export function Player(props: {player: PlayerModel}) {
   const currentPlayer = useSelector(selectCurrentPlayer);
   const canAimAt = useSelector(selectAimablePlayers).has(player.id);
   const selectable = useSelector(selectSelectableItems).players;
-  const activeSelection = useSelector(selectActiveSelection);
+  const activeSelection = useSelector(selectLocalSelection);
 
   const isSelectable = selectable.has(player.id);
   const wounds = new Array(player.wounds).fill(null).map((_, i) => i);

@@ -1,6 +1,7 @@
 import {
   generateId,
   getCurrentPlayer,
+  getLocalPlayer,
   getPlayer,
   getPlayerOrCurrent,
   isBoss,
@@ -417,12 +418,9 @@ export function revealSelectedIntegrityCard(
 }
 
 export function selectItem(state: GameState, item: GameItem) {
-  // TODO: For debugging, I just route it to the first selection
-  // on the stack. This should really go to state.local.player.
-  const player = getCurrentPlayer(state)!;
+  const player = getLocalPlayer(state)!;
   const selections = state.shared.selections;
-  // const selection = selections.filter(s => s.player === player.id)[0];
-  const selection = selections[0];
+  const selection = selections.filter(s => s.player === player.id)[0];
 
   if (!selection) {
     return;

@@ -17,6 +17,14 @@ export function getCurrentPlayer(state: GameState): Player | undefined {
 }
 
 /**
+ * Return the player running this terminal.
+ */
+export function getLocalPlayer(state: GameState): Player | undefined {
+  const id = state.local.player;
+  return getPlayer(state, id);
+}
+
+/**
  * Finds a player with the given id.
  */
 export function getPlayer(state: GameState, id: number): Player | undefined {

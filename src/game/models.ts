@@ -39,6 +39,11 @@ export interface LocalGameState {
    * The id of the local player.
    */
   player: number;
+
+  /**
+   * Whether debug mode is one.
+   */
+  debug?: boolean;
 }
 
 export enum Team {
@@ -242,7 +247,8 @@ export interface EquipmentCardConfig {
 }
 
 /**
- * Captures that a player is actively viewing a card.
+ * Captures that a player has been temporarily granted visibility
+ * to see the face of a card.
  */
 export interface Visibility {
   id: number;

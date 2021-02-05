@@ -6,7 +6,7 @@ import {
   Player as PlayerModel,
 } from '../game/models';
 import {
-  selectActiveSelection,
+  selectLocalSelection,
   selectCanEquip,
   selectPlaybleEquipmentId,
   selectSelectableItems,
@@ -23,7 +23,7 @@ export function EquipmentCard(props: {
   const visibleCards = useSelector(selectVisibleEquipmentCards);
   const canEquip = useSelector(selectCanEquip) && !owner;
   const selectable = useSelector(selectSelectableItems).equipmentCards;
-  const activeSelection = useSelector(selectActiveSelection);
+  const activeSelection = useSelector(selectLocalSelection);
   const isPlayable = useSelector(selectPlaybleEquipmentId) === card.id;
 
   const isFaceUp = card.state === CardState.FACE_UP;

@@ -21,6 +21,7 @@ export function setupGame(numPlayers: number): GameState {
     shared,
     local: {
       player: shared.order[0],
+      debug: true,
     },
   };
 }
@@ -38,7 +39,7 @@ export function createSharedState(numPlayers: number): SharedGameState {
     turnDirection: TurnDirection.CLOCKWISE,
     stage: GameStage.PLAYING,
     turn: {
-      activePlayer: 1,
+      activePlayer: 0,
       actionsLeft: 1,
       stage: TurnStage.TAKE_ACTION,
     },
