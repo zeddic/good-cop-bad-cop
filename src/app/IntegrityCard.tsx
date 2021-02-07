@@ -1,5 +1,5 @@
 import {useDispatch, useSelector} from 'react-redux';
-import {gameSlice} from '../game/game_store.ts';
+import {gameSlice} from '../game/game_store';
 import {
   Player as PlayerModel,
   IntegrityCard as IntegrityCardModel,

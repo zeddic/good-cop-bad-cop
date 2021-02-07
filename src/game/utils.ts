@@ -21,7 +21,7 @@ export function getCurrentPlayer(state: GameState): Player | undefined {
  */
 export function getLocalPlayer(state: GameState): Player | undefined {
   const id = state.local.player;
-  return getPlayer(state, id);
+  return id !== undefined ? getPlayer(state, id) : undefined;
 }
 
 /**
@@ -98,4 +98,20 @@ export function generateId(): number {
   // Should probably scan the state here because we may connect to
   // an existing sessions (or use a guid). Easy for now.
   return idGen++;
+}
+
+/**
+ * Generates a new unique player id.
+ */
+export function generatePlayerId(state: GameState): number {
+  const players = Object.values(state.shared.players);
+  const ids = players.map(p => p.id);
+  const taken = new Set<number>(ids);
+  return findFirstFreeNumber(taken);
+}
+
+function findFirstFreeNumber(taken: Set<number>): number {
+  let i = 1;
+  while (taken.has(i)) i++;
+  return i;
 }

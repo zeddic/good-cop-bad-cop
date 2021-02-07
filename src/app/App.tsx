@@ -1,126 +1,85 @@
-import React, {ChangeEvent} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {gameSlice} from '../game/game_store.ts';
-import {Team} from '../game/models';
+import {gameSlice, joinGame} from '../game/game_store';
 import {
-  selectCanEndTurn,
-  selectCanFireGun,
-  selectCanSkipActionStage,
-  selectDebug,
-  selectEquipment,
-  selectGunSupply,
-  selectLocalPlayer,
-  selectLocalSelection,
-  selectPlayers,
-  selectTurn,
-  selectWinner,
+  selectGame,
+  selectGameId,
+  selectName,
+  selectShared,
 } from '../game/selectors';
 import './App.scss';
-import {EquipmentCard} from './EquipmentCard';
-import {Gun} from './Gun';
-import {Player} from './Player';
+import {setGame, subscribeToGame} from '../firebase/firebase';
+import Game from './Game';
+import {SharedGameState} from '../game/models';
+import * as _ from 'lodash';
+
+let lastUpdate: {shared: SharedGameState; gameId: string} | undefined;
 
 function App() {
-  const turn = useSelector(selectTurn);
-  const players = useSelector(selectPlayers);
-  const localPlayer = useSelector(selectLocalPlayer);
-  const gunSupply = useSelector(selectGunSupply);
-  const equipment = useSelector(selectEquipment)[0];
-  const activeSelection = useSelector(selectLocalSelection);
-  const canEndTurn = useSelector(selectCanEndTurn);
-  const canSkipActionStage = useSelector(selectCanSkipActionStage);
-  const canFireGun = useSelector(selectCanFireGun);
-  const winner = useSelector(selectWinner);
-  const debug = useSelector(selectDebug);
-
-  const unresolvedShot = turn.unresolvedGunShot;
-
+  const [inputName, setInputName] = useState('');
   const dispatch = useDispatch();
+  const sharedState = useSelector(selectShared);
+  const username = useSelector(selectName);
+  const gameId = useSelector(selectGameId);
+  // const blah = useSelector(selectGame);
+  // console.log(blah);
 
-  function endTurn() {
-    dispatch(gameSlice.actions.endTurn());
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    setInputName(event.target.value);
   }
 
-  function skipActionStage() {
-    dispatch(gameSlice.actions.skipActionStage());
+  function onPlayClick() {
+    dispatch(gameSlice.actions.setName(inputName));
+    // Hard-coded the default game for now. We can add
+    // a game list / picker later.
+    dispatch(joinGame('1'));
   }
 
-  function fireGun() {
-    dispatch(gameSlice.actions.fireGun());
-  }
+  /**
+   * Firebase --> Store
+   */
+  useEffect(() => {
+    if (gameId === undefined) return;
+    console.log(`Subscribing to updates in ${gameId}`);
+    return subscribeToGame(gameId, shared => {
+      console.log('Recieved Update');
+      lastUpdate = {gameId, shared};
+      dispatch(gameSlice.actions.updateRemoteState(shared));
+    });
+  }, [gameId, dispatch]);
 
-  function resolveGunShot() {
-    dispatch(gameSlice.actions.resolveGunShot());
-  }
+  /**
+   * Store --> Firebase
+   */
+  useEffect(() => {
+    const proposedUpdate = {gameId, shared: sharedState};
+    if (gameId === undefined) return;
+    if (_.isEqual(lastUpdate, proposedUpdate)) {
+      console.log('Skipping sending update');
+      return;
+    }
 
-  function emulatePlayer(event: ChangeEvent<HTMLSelectElement>) {
-    const player = Number.parseInt(event.target.value);
-    dispatch(gameSlice.actions.emulatePlayer(player));
-  }
+    console.log('Sending Update');
+    setGame(gameId, sharedState);
+  }, [gameId, sharedState]);
 
   return (
     <div className="App">
-      <div className="game-bar">
-        <button className="btn" onClick={endTurn} disabled={!canEndTurn}>
-          End Turn
-        </button>
-
-        {canFireGun && (
-          <button className="btn" onClick={fireGun}>
-            Fire gun
+      {!username && (
+        <div className="login">
+          <input
+            type="text"
+            placeholder="User name"
+            value={inputName}
+            onChange={handleChange}
+          ></input>
+          <button className="btn" onClick={onPlayClick}>
+            Play
           </button>
-        )}
+        </div>
+      )}
 
-        {unresolvedShot && (
-          <button className="btn" onClick={resolveGunShot}>
-            Resolve Gun Shot
-          </button>
-        )}
-
-        {canSkipActionStage && (
-          <button className="btn" onClick={skipActionStage}>
-            Skip Action
-          </button>
-        )}
-
-        {debug && (
-          <>
-            Emulate:
-            <select value={localPlayer.id} onChange={emulatePlayer}>
-              {players.map(player => (
-                <option key={player.id} value={player.id}>
-                  {player.name} ({player.id})
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {winner && (
-          <h2>
-            {winner === Team.GOOD ? 'The good cops win!' : 'The bad cops win!'}
-          </h2>
-        )}
-
-        {activeSelection && (
-          <div>
-            <strong>{activeSelection.description}</strong>
-          </div>
-        )}
-      </div>
-
-      <div className="players">
-        {players.map(player => (
-          <Player key={player.id} player={player}></Player>
-        ))}
-      </div>
-
-      <h2>Supply</h2>
-      {gunSupply.map(gun => (
-        <Gun key={gun.id} gun={gun}></Gun>
-      ))}
-
-      {equipment && <EquipmentCard card={equipment}></EquipmentCard>}
+      {username && <Game></Game>}
     </div>
   );
 }

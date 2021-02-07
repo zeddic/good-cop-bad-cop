@@ -19,6 +19,7 @@ export interface GameState {
  * that are in play, etc.
  */
 export interface SharedGameState {
+  id?: string;
   players: Record<number, Player>;
   order: number[];
   turn: Turn;
@@ -36,14 +37,24 @@ export interface SharedGameState {
  */
 export interface LocalGameState {
   /**
-   * The id of the local player.
+   * The id of the local player in the shared game.
    */
-  player: number;
+  player?: number;
 
   /**
-   * Whether debug mode is one.
+   * Whether debug mode is on.
    */
   debug?: boolean;
+
+  /**
+   * The users preferred name in any game.
+   */
+  name?: string;
+
+  /**
+   * The id of the game they are currently playing.
+   */
+  game?: string;
 }
 
 export enum Team {
@@ -121,6 +132,7 @@ export interface Player {
   wounds: number;
   gun?: Gun;
   dead: boolean;
+  spectator?: boolean;
 }
 
 export interface Gun {

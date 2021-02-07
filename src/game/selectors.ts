@@ -13,6 +13,12 @@ export const selectLocal = createSelector(selectGame, g => g.local);
 
 export const selectDebug = createSelector(selectLocal, s => s.debug);
 
+export const selectName = createSelector(selectLocal, s => s.name);
+
+export const selectGameId = createSelector(selectLocal, s => s.game);
+
+export const selectStage = createSelector(selectShared, s => s.stage);
+
 /**
  * The player who is playing their turn now.
  */
@@ -28,7 +34,9 @@ export const selectLocalPlayer = createSelector(
   selectShared,
   selectLocal,
   (shared, local) => {
-    return shared.players[local.player];
+    return local.player !== undefined
+      ? shared.players[local.player]
+      : undefined;
   }
 );
 
@@ -40,7 +48,7 @@ export const selectIsLocalPlayersTurn = createSelector(
   selectLocalPlayer,
   selectCurrentPlayer,
   (localPlayer, currentPlayer) => {
-    return localPlayer.id === currentPlayer.id;
+    return currentPlayer && localPlayer?.id === currentPlayer?.id;
   }
 );
 
@@ -68,6 +76,10 @@ export const selectPlayers = createSelector(
   }
 );
 
+export const selectEveryone = createSelector(selectPlayersById, byId => {
+  return Object.values(byId);
+});
+
 export function selectPlayer(id?: number) {
   return createSelector(selectPlayersById, byId => {
     return id ? byId[id] : undefined;
@@ -88,7 +100,7 @@ export const selectVisibleIntegrityCards = createSelector(
 
     // Granted visibility
     for (const view of visibility) {
-      if (view.player === localPlayer.id) {
+      if (view.player === localPlayer?.id) {
         for (let item of view.items) {
           if (item.type === GameItemType.INTEGRITY_CARD) {
             visible.add(item.id!);
@@ -98,8 +110,10 @@ export const selectVisibleIntegrityCards = createSelector(
     }
 
     // Players can always view their own cards
-    for (const card of localPlayer.integrityCards) {
-      visible.add(card.id);
+    if (localPlayer) {
+      for (const card of localPlayer.integrityCards) {
+        visible.add(card.id);
+      }
     }
 
     return visible;
@@ -114,7 +128,7 @@ export const selectVisibleEquipmentCards = createSelector(
 
     // Granted visibility
     for (const view of visibility) {
-      if (view.player === localPlayer.id) {
+      if (view.player === localPlayer?.id) {
         for (let item of view.items) {
           if (item.type === GameItemType.EQUIPMENT_CARD) {
             visible.add(item.id!);
@@ -124,8 +138,10 @@ export const selectVisibleEquipmentCards = createSelector(
     }
 
     // Players can always view their own cards
-    for (const card of localPlayer.equipment) {
-      visible.add(card.id);
+    if (localPlayer) {
+      for (const card of localPlayer.equipment) {
+        visible.add(card.id);
+      }
     }
 
     return visible;
@@ -152,7 +168,7 @@ export const selectLocalSelection = createSelector(
   selectLocalPlayer,
   selectDebug,
   (selections, localPlayer, debug) => {
-    return selections.filter(s => s.player === localPlayer.id)[0];
+    return selections.filter(s => s.player === localPlayer?.id)[0];
   }
 );
 
@@ -234,6 +250,7 @@ export const selectCanPlayEquipment = createSelector(
   selectLocalPlayer,
   (state, turn, selections, localPlayer) => {
     if (
+      !localPlayer ||
       turn.unresolvedEquipment ||
       selections.length > 0 ||
       localPlayer.equipment.length !== 1
@@ -265,6 +282,14 @@ export const selectCanEndTurn = createSelector(
     );
   }
 );
+
+/**
+ * Returns whether the game can be started.
+ */
+export const selectCanStartGame = createSelector(selectShared, shared => {
+  // TODO: check size of everyone.
+  return shared.stage === GameStage.PRE_GAME;
+});
 
 /**
  * Returns whether the user is allowed to skip their action
@@ -372,6 +397,10 @@ export const selectPlaybleEquipmentId = createSelector(
   selectCanPlayEquipment,
   selectLocalPlayer,
   (canPlay, localPlayer) => {
-    return canPlay ? localPlayer.equipment[0]!.id : undefined;
+    if (!localPlayer || !canPlay) {
+      return undefined;
+    }
+
+    return localPlayer.equipment[0]!.id;
   }
 );

@@ -1,5 +1,5 @@
-import {configureStore} from '@reduxjs/toolkit';
-import {gameSlice} from '../game/game_store.ts';
+import {Action, configureStore, ThunkAction} from '@reduxjs/toolkit';
+import {gameSlice} from '../game/game_store';
 
 export const store = configureStore({
   reducer: {
@@ -9,3 +9,5 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export const selectAll = (state: RootState) => state;
+
+export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

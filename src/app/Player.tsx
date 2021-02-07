@@ -1,12 +1,13 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {gameSlice} from '../game/game_store.ts';
+import {gameSlice} from '../game/game_store';
 import {Player as PlayerModel} from '../game/models';
 import {
   selectLocalSelection,
   selectAimablePlayers,
   selectCurrentPlayer,
   selectSelectableItems,
+  selectGame,
 } from '../game/selectors';
 import {EquipmentCard} from './EquipmentCard';
 import {Gun} from './Gun';

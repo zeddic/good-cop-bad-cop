@@ -13,8 +13,213 @@ import {
   EquipmentCard,
   EquipmentCardType,
 } from './models';
+import {generatePlayerId} from './utils';
 
-export function setupGame(numPlayers: number): GameState {
+/**
+ * Creates an empty GameState.
+ */
+export function createEmptyGame(): GameState {
+  return {
+    local: {
+      debug: true,
+    },
+    shared: createEmptySharedPreGame(),
+  };
+}
+
+/**
+ * Creates an empty shared GameState, initialized with no players in
+ * the PRE_GAME stage.
+ */
+export function createEmptySharedPreGame(): SharedGameState {
+  return {
+    players: {},
+    order: [],
+    guns: [],
+    equipment: [],
+    selections: [],
+    visibility: [],
+    turnDirection: TurnDirection.CLOCKWISE,
+    stage: GameStage.PRE_GAME,
+    turn: {
+      activePlayer: 0,
+      stage: TurnStage.TAKE_ACTION,
+      actionsLeft: 1,
+    },
+  };
+}
+
+/**
+ * Initializes the local store's state with a remote shared state that has
+ * been obtained.
+ */
+export function loadGame(
+  state: GameState,
+  gameId: string,
+  shared: SharedGameState
+) {
+  state.shared = shared;
+  state.local.game = gameId;
+  ensureLocalPlayerInGame(state);
+}
+
+/**
+ * Resets the existing game state back to PRE_GAME. Drops all other
+ * enrolled players except for the current player.
+ */
+export function resetGame(state: GameState) {
+  state.shared = createEmptySharedPreGame();
+  ensureLocalPlayerInGame(state);
+}
+
+/**
+ * Registers the local player into the SharedGameState.
+ * Does nothing if the local player is already enrolled.
+ */
+export function addLocalPlayerToGame(state: GameState) {
+  if (isLocalPlayerInGame(state)) {
+    return;
+  }
+
+  const playerId = state.local.player ?? generatePlayerId(state);
+  const name = state.local.name || `Player ${playerId}`;
+
+  state.local.player = playerId;
+  state.local.name = name;
+
+  const player: Player = {
+    id: playerId,
+    name: name,
+    spectator: true,
+    dead: false,
+    equipment: [],
+    wounds: 0,
+    integrityCards: [],
+    gun: undefined,
+  };
+
+  state.shared.players[playerId] = player;
+  return playerId;
+}
+
+/**
+ * Ensures that the local player has been registered with the
+ * shared game state. Does nothing if they already are, otherwise
+ * joins.
+ */
+export function ensureLocalPlayerInGame(state: GameState) {
+  if (!isLocalPlayerInGame(state)) {
+    addLocalPlayerToGame(state);
+  }
+}
+
+/**
+ * Returns true if the local player is already a known player in
+ * the SharedGameState.
+ */
+function isLocalPlayerInGame(state: GameState) {
+  const playerId = state.local.player;
+  const players = state.shared.players;
+  return playerId !== undefined && players[playerId];
+}
+
+/**
+ * Updates the local players registered name.
+ */
+export function updateLocalPlayerName(state: GameState, name: string) {
+  state.local.name = name;
+  if (
+    state.local.player !== undefined &&
+    state.shared.players[state.local.player]
+  ) {
+    state.shared.players[state.local.player].name = name;
+  }
+}
+
+// /**
+//  * Sets the game id that the player should be joined to.
+//  */
+// export function setGameId(state: GameState, id: string) {
+//   const inExistingGame = state.local.game !== undefined;
+//   const isDifferentGame = inExistingGame && state.local.game !== id;
+//   state.local.game = id;
+
+//   if (isDifferentGame) {
+//     state.shared = createEmptySharedPreGame();
+//   }
+// }
+
+/**
+ * Starts the game.
+ *
+ *  - Resets all existing game state (except for the list of players)
+ *  - Picks what players get to play (if there are more than 8)
+ *  - Decides turn order
+ *  - Shuffles / equipment / integrity cards
+ *  - Sets the game to PLAYING
+ *  - Starts the first turn
+ */
+export function startGame(state: GameState) {
+  // Find everyone that can play.
+  // We only have enough for 8 players. If there are more,
+  // 8 random players will get to play and the rest will be
+  // spectators.
+  let playerIds = Object.values(state.shared.players).map(p => p.id);
+  shuffle(playerIds);
+  if (playerIds.length > 8) {
+    playerIds.splice(8);
+  }
+
+  const numPlayers = playerIds.length;
+  const everyone = Object.values(state.shared.players);
+  const playersById = indexPlayersById(everyone);
+  const idsThatGetToPlay = new Set<number>(playerIds);
+
+  // Reset all the players to a default state.
+  for (const player of everyone) {
+    player.integrityCards = [];
+    player.equipment = [];
+    player.gun = undefined;
+    player.wounds = 0;
+    player.dead = false;
+    player.spectator = !idsThatGetToPlay.has(player.id);
+  }
+
+  // Figure out the cards we will play with.
+  const guns = createGunsForPlayers(numPlayers);
+  const equipment = buildEquipmentDeck();
+  const assignments = getIntegrityCardAssignments(numPlayers);
+
+  // Distribute cards from the deck.
+  for (const playerId of playerIds) {
+    const player = playersById[playerId]!;
+    player.integrityCards = assignments.pop()!;
+    player.equipment = []; // todo, grant everyone one equipment
+  }
+
+  // Reset the rest of the game state.
+  state.shared = {
+    ...state.shared,
+    order: playerIds,
+    guns,
+    equipment,
+    selections: [],
+    visibility: [],
+    turnDirection: TurnDirection.CLOCKWISE,
+    stage: GameStage.PLAYING,
+    turn: {
+      activePlayer: playerIds[0],
+      stage: TurnStage.TAKE_ACTION,
+      actionsLeft: 1,
+    },
+  };
+}
+
+/**
+ * Creates a game for debugging / development.
+ * It is pre-popualted with the specified number of players.
+ */
+export function createDebugGame(numPlayers: number): GameState {
   const shared = createSharedState(numPlayers);
 
   return {
@@ -27,7 +232,7 @@ export function setupGame(numPlayers: number): GameState {
 }
 
 export function createSharedState(numPlayers: number): SharedGameState {
-  const players = createPlayers(numPlayers);
+  const players = createDebugPlayers(numPlayers);
 
   return {
     players: indexPlayersById(players),
@@ -78,11 +283,7 @@ function indexPlayersById(players: Player[]): Record<number, Player> {
   return playersById;
 }
 
-function createPlayers(numPlayers: number) {
-  // This logic will change in the future once players join
-  // a room and then the cards are delt. For testing, just
-  // auto generate the players for now.
-
+function createDebugPlayers(numPlayers: number) {
   const assignments = getIntegrityCardAssignments(numPlayers);
   const players: Player[] = [];
   for (let i = 0; i < numPlayers; i++) {

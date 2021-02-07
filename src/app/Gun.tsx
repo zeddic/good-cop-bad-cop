@@ -1,5 +1,5 @@
 import {useDispatch, useSelector} from 'react-redux';
-import {gameSlice} from '../game/game_store.ts';
+import {gameSlice} from '../game/game_store';
 import {Gun as GunModel, Player as PlayerModel} from '../game/models';
 import {
   selectLocalSelection,
