@@ -1,6 +1,6 @@
 import {CardState, GameItemType, GameState, Query, Selection} from './models';
 import {findItems} from './queries';
-import {generateId, getPlayer} from './utils';
+import {generateSelectionId, generateVisibilityId, getPlayer} from './utils';
 
 /**
  * Investigates a target players integrity card, place it face up.
@@ -28,7 +28,7 @@ export function investigateIntegrityCard(
 
   // Grant the player investigating visibility for this turn.
   state.shared.visibility.push({
-    id: generateId(),
+    id: generateVisibilityId(state),
     player: player.id,
     items: [
       {
@@ -69,7 +69,7 @@ export function requirePlayerToRevealAnIntegrityCard(
   }
 
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player?.id,
     query: {
       type: GameItemType.INTEGRITY_CARD,
@@ -131,7 +131,7 @@ export function requirePlayerToInvestigateOtherPlayer(
   }
 
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player?.id,
     query: {
       type: GameItemType.INTEGRITY_CARD,

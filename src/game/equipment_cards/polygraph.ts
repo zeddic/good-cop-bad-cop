@@ -8,7 +8,12 @@ import {
   Player,
   Selection,
 } from '../models';
-import {generateId, getPlayer, getPlayers} from '../utils';
+import {
+  generateSelectionId,
+  generateVisibilityId,
+  getPlayer,
+  getPlayers,
+} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -24,7 +29,7 @@ function play(state: GameState, player: number) {
   const targets = getTargetablePlayers(state, player).map(p => p.id);
 
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player,
     query: {
       type: GameItemType.PLAYER,
@@ -78,7 +83,7 @@ function grantPlayerVisibilityToOthersCards(
   }));
 
   state.shared.visibility.push({
-    id: generateId(),
+    id: generateVisibilityId(state),
     player: player.id,
     items,
   });

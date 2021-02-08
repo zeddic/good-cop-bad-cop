@@ -1,14 +1,14 @@
 import {checkIfPlayerHasTooManyEquipmentCards} from '../equipment';
 import {
   EquipmentCardConfig,
-  EquipmentCardType,
-  GameState,
-  GameItemType,
   EquipmentCardResult,
+  EquipmentCardType,
+  GameItemType,
+  GameState,
   Selection,
 } from '../models';
 import {findItems} from '../queries';
-import {generateId, getPlayer, removeItemWithId} from '../utils';
+import {generateSelectionId, getPlayer, removeItemWithId} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -29,7 +29,7 @@ function canPlay(state: GameState, player: number) {
  */
 function play(state: GameState, player: number) {
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player,
     query: {
       type: GameItemType.EQUIPMENT_CARD,

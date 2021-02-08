@@ -92,12 +92,21 @@ export function removeItemWithId<T extends {id: number}>(
 let idGen = 0;
 
 /**
- * Generates a new unique id for the session.
+ * Generates a new unique selection id.
  */
-export function generateId(): number {
-  // Should probably scan the state here because we may connect to
-  // an existing sessions (or use a guid). Easy for now.
-  return idGen++;
+export function generateSelectionId(state: GameState): number {
+  const selections = state.shared.selections;
+  const ids = selections.map(sel => sel.id);
+  return findFirstFreeNumber(ids);
+}
+
+/**
+ * Generates a new unique selection id.
+ */
+export function generateVisibilityId(state: GameState): number {
+  const selections = state.shared.visibility;
+  const ids = selections.map(sel => sel.id);
+  return findFirstFreeNumber(ids);
 }
 
 /**
@@ -106,11 +115,11 @@ export function generateId(): number {
 export function generatePlayerId(state: GameState): number {
   const players = Object.values(state.shared.players);
   const ids = players.map(p => p.id);
-  const taken = new Set<number>(ids);
-  return findFirstFreeNumber(taken);
+  return findFirstFreeNumber(ids);
 }
 
-function findFirstFreeNumber(taken: Set<number>): number {
+function findFirstFreeNumber(ids: number[]): number {
+  const taken = new Set<number>(ids);
   let i = 1;
   while (taken.has(i)) i++;
   return i;

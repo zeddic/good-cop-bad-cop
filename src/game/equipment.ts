@@ -1,13 +1,13 @@
-import {getPlayer, generateId, removeItemWithId} from './utils';
 import {getEquipmentConfig} from './equipment_config';
 import {
-  GameState,
-  GameItemType,
   CardState,
-  EquipmentCardResult,
   EquipmentCard,
+  EquipmentCardResult,
+  GameItemType,
+  GameState,
   Selection,
 } from './models';
+import {generateSelectionId, getPlayer, removeItemWithId} from './utils';
 
 /**
  * Causes the player to pickup an equipment card. If they have too many, they
@@ -44,7 +44,7 @@ export function checkIfPlayerHasTooManyEquipmentCards(
   }
 
   state.shared.selections.push({
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player?.id,
     query: {
       type: GameItemType.EQUIPMENT_CARD,

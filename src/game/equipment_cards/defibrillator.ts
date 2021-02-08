@@ -6,7 +6,7 @@ import {
   GameState,
   Selection,
 } from '../models';
-import {generateId, getPlayers, removeItemWithId} from '../utils';
+import {generateSelectionId, getPlayers, removeItemWithId} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -24,7 +24,7 @@ function play(state: GameState, player: number) {
   const deadPlayerIds = deadPlayers.map(p => p.id);
 
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player,
     query: {
       type: GameItemType.PLAYER,
@@ -108,7 +108,7 @@ function askToPickIntegrityCardsFromTarget(
   const player = selection.player;
 
   const cardSelection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player,
     query: {
       type: GameItemType.INTEGRITY_CARD,
