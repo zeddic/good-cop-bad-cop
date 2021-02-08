@@ -19,11 +19,9 @@ jobs:
 
       - name: setup
         run: yarn install
-        working-directory: www
 
       - name: build
         run: yarn build
-        working-directory: www
 
       - name: verify built output
         run: find build/ -print
