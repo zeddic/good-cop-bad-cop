@@ -140,7 +140,7 @@ function Game() {
           </button>
         )}
 
-        {true && (
+        {debug && (
           <button className="btn" onClick={startDebugGame}>
             Start debug game
           </button>

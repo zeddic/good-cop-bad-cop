@@ -21,7 +21,7 @@ import {generatePlayerId} from './utils';
 export function createEmptyGame(): GameState {
   return {
     local: {
-      debug: true,
+      debug: false,
     },
     shared: createEmptySharedPreGame(),
   };
