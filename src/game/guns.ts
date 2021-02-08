@@ -31,17 +31,17 @@ export function aimGun(
 
   if (!player) {
     // TODO: move these consoles to logs
-    console.log('Invalid user specified');
+    // console.log('Invalid user specified');
     return;
   }
 
   if (!target) {
-    console.log(`${options.target} is not a valid player to aim at`);
+    // console.log(`${options.target} is not a valid player to aim at`);
     return;
   }
 
   if (!player.gun) {
-    console.log(`Player does not have a gun to aim.`);
+    // console.log(`Player does not have a gun to aim.`);
     return;
   }
 
@@ -64,22 +64,22 @@ export function fireGun(state: GameState, options: {player: number}): boolean {
   }
 
   if (!player.gun) {
-    console.log(`Player ${player.id} is not holding a gun to fire.`);
+    // console.log(`Player ${player.id} is not holding a gun to fire.`);
     return false;
   }
 
   if (player.gun.aimedAt === undefined) {
-    console.log(`Player ${player.id} has not aimed gun yet`);
+    // console.log(`Player ${player.id} has not aimed gun yet`);
     return false;
   }
 
   const target = getPlayer(state, player.gun.aimedAt);
 
   if (!target) {
-    console.log(`Cannot fire gun at invalid target ${player.gun.aimedAt}`);
+    // console.log(`Cannot fire gun at invalid target ${player.gun.aimedAt}`);
     return false;
   } else if (target.dead) {
-    console.log('Target player is already dead');
+    // console.log('Target player is already dead');
     return false;
   }
 

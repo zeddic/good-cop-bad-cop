@@ -5,7 +5,7 @@ import {generateId, getPlayer} from './utils';
 /**
  * Investigates a target players integrity card, place it face up.
  */
-export function investigatePlayer(
+export function investigateIntegrityCard(
   state: GameState,
   options: {player: number; target: number; card: number}
 ): boolean {
@@ -103,4 +103,61 @@ export function revealSelectedIntegrityCard(
   if (card.length === 1) {
     card[0].state = CardState.FACE_UP;
   }
+}
+
+/**
+ * Require that the specified player investigate another
+ * player. After making a selection, this will grant the
+ * original player visibility to that card for the duration
+ * of the current turn.
+ */
+export function requirePlayerToInvestigateOtherPlayer(
+  state: GameState,
+  options: {player: number; target: number}
+) {
+  const player = getPlayer(state, options.player);
+  const target = getPlayer(state, options.target);
+
+  if (!player || !target || target.id === player.id) {
+    return;
+  }
+
+  const hasAFaceDownCard = target.integrityCards.some(
+    c => c.state === CardState.FACE_DOWN
+  );
+
+  if (!hasAFaceDownCard) {
+    return;
+  }
+
+  const selection: Selection = {
+    id: generateId(),
+    player: player?.id,
+    query: {
+      type: GameItemType.INTEGRITY_CARD,
+      filters: [
+        {type: 'is_face_down', isFaceDown: true},
+        {type: 'is_player', players: [target.id]},
+      ],
+    },
+    numToSelect: 1,
+    selected: [],
+    task: 'investigate_integrity_card',
+    description: 'Select an integrity card to investigate',
+    tooltip: 'Investigate this card',
+  };
+
+  state.shared.selections.push(selection);
+}
+
+export function investigateSelectedIntegrityCard(
+  state: GameState,
+  selection: Selection
+) {
+  const selected = selection.selected[0]!;
+  investigateIntegrityCard(state, {
+    player: selection.player,
+    target: selected.owner!,
+    card: selected.id,
+  });
 }

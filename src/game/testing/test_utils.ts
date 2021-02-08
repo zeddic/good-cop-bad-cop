@@ -9,7 +9,84 @@ import {
   Selection,
   EquipmentCard,
   EquipmentCardType,
+  GameState,
+  TurnDirection,
+  GameStage,
+  TurnStage,
 } from '../models';
+
+const GOOD = IntegrityCardType.GOOD;
+const BAD = IntegrityCardType.BAD;
+const KING_PIN = IntegrityCardType.KING_PIN;
+const AGENT = IntegrityCardType.AGENT;
+
+/**
+ * Create a basic 4 player game with:
+ * - 1 good, 1 bad, 1 agent, 1 kingpin
+ * - In the playging stage
+ * - With the local player as player 0
+ * - All cards face down
+ * - Everyone alive
+ * - The turn on player 0
+ */
+export function createBasic4PlayerGame() {
+  const state: GameState = {
+    local: {
+      player: 0,
+      debug: false,
+    },
+    shared: {
+      players: {
+        0: createPlayer({
+          id: 0,
+          integrity: [
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD}),
+          ],
+        }),
+        1: createPlayer({
+          id: 1,
+          integrity: [
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD}),
+            createIntegrityCard({type: BAD}),
+          ],
+        }),
+        2: createPlayer({
+          id: 2,
+          integrity: [
+            createIntegrityCard({type: BAD}),
+            createIntegrityCard({type: AGENT}),
+            createIntegrityCard({type: BAD}),
+          ],
+        }),
+        3: createPlayer({
+          id: 3,
+          integrity: [
+            createIntegrityCard({type: GOOD}),
+            createIntegrityCard({type: BAD}),
+            createIntegrityCard({type: KING_PIN}),
+          ],
+        }),
+      },
+      order: [0, 1, 2, 3],
+      guns: createGuns({num: 1}),
+      equipment: [],
+      selections: [],
+      visibility: [],
+      turnDirection: TurnDirection.CLOCKWISE,
+      stage: GameStage.PLAYING,
+      turn: {
+        activePlayer: 0,
+        stage: TurnStage.TAKE_ACTION,
+        actionsLeft: 2,
+      },
+    },
+  };
+
+  return state;
+}
 
 /**
  * Creates a Player for tests.

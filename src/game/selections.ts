@@ -2,7 +2,11 @@ import {
   discardSelectedEquipmentCard,
   handleEquipmentCardSelection,
 } from './equipment';
-import {revealSelectedIntegrityCard} from './integrity_cards';
+import {
+  investigateIntegrityCard,
+  investigateSelectedIntegrityCard,
+  revealSelectedIntegrityCard,
+} from './integrity_cards';
 import {GameState, GameItem} from './models';
 import {getLocalPlayer} from './utils';
 
@@ -33,6 +37,8 @@ export function selectItem(state: GameState, item: GameItem) {
 
   if (task === 'reveal_integrity_card') {
     revealSelectedIntegrityCard(state, selection);
+  } else if (task === 'investigate_integrity_card') {
+    investigateSelectedIntegrityCard(state, selection);
   } else if (task === 'discard_equipment_card') {
     discardSelectedEquipmentCard(state, selection);
   } else if (task === 'equipment') {

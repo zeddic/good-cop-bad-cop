@@ -10,7 +10,7 @@ import {
 import {pickupEquipment} from './equipment';
 import {pickupGun, aimGun, fireGun, resolveGunShot} from './guns';
 import {
-  investigatePlayer,
+  investigateIntegrityCard,
   requirePlayerToRevealAnIntegrityCard,
 } from './integrity_cards';
 
@@ -34,7 +34,10 @@ export function turnInvestigatePlayer(
 
   // Investigate
   const player = getCurrentPlayer(state)!;
-  const success = investigatePlayer(state, {...options, player: player?.id});
+  const success = investigateIntegrityCard(state, {
+    ...options,
+    player: player?.id,
+  });
   if (!success) {
     return;
   }

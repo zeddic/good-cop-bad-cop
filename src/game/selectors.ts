@@ -250,10 +250,12 @@ export const selectCanPlayEquipment = createSelector(
   selectLocalPlayer,
   (state, turn, selections, localPlayer) => {
     if (
-      !localPlayer ||
       turn.unresolvedEquipment ||
       selections.length > 0 ||
-      localPlayer.equipment.length !== 1
+      !localPlayer ||
+      localPlayer.equipment.length !== 1 ||
+      localPlayer.dead ||
+      localPlayer.spectator
     ) {
       return false;
     }
