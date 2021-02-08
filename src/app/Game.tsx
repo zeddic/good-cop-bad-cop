@@ -55,6 +55,10 @@ function Game() {
     dispatch(gameSlice.actions.startGame());
   }
 
+  function startDebugGame() {
+    dispatch(gameSlice.actions.startDebugGame());
+  }
+
   function skipActionStage() {
     dispatch(gameSlice.actions.skipActionStage());
   }
@@ -133,6 +137,12 @@ function Game() {
         {true && (
           <button className="btn" onClick={resetGame}>
             Reset Game
+          </button>
+        )}
+
+        {true && (
+          <button className="btn" onClick={startDebugGame}>
+            Start debug game
           </button>
         )}
 

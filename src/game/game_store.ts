@@ -6,6 +6,7 @@ import {playEquipment} from './equipment';
 import {GameItem, SharedGameState} from './models';
 import {selectItem} from './selections';
 import {
+  createDebugGame,
   createEmptyGame,
   ensureLocalPlayerInGame,
   loadGame,
@@ -31,6 +32,11 @@ export const gameSlice = createSlice({
   reducers: {
     setName: (state, action: PayloadAction<string>) => {
       updateLocalPlayerName(state, action.payload);
+    },
+    startDebugGame: state => {
+      const game = createDebugGame(4);
+      state.shared = game.shared;
+      state.local.player = state.shared.order[0];
     },
     loadGame: (
       state,
