@@ -1,6 +1,5 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import {Shared} from 'react-redux';
 import {SharedGameState} from '../game/models';
 
 const FIREBASE_CONFIG = {

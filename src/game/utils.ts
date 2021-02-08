@@ -89,8 +89,6 @@ export function removeItemWithId<T extends {id: number}>(
   return removed;
 }
 
-let idGen = 0;
-
 /**
  * Generates a new unique selection id.
  */

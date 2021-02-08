@@ -1,17 +1,12 @@
+import * as _ from 'lodash';
 import React, {ChangeEvent, useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {gameSlice, joinGame} from '../game/game_store';
-import {
-  selectGame,
-  selectGameId,
-  selectName,
-  selectShared,
-} from '../game/selectors';
-import './App.scss';
 import {setGame, subscribeToGame} from '../firebase/firebase';
-import Game from './Game';
+import {gameSlice, joinGame} from '../game/game_store';
 import {SharedGameState} from '../game/models';
-import * as _ from 'lodash';
+import {selectGameId, selectName, selectShared} from '../game/selectors';
+import './App.scss';
+import Game from './Game';
 
 let lastUpdate: {shared: SharedGameState; gameId: string} | undefined;
 

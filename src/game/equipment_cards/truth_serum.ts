@@ -1,14 +1,14 @@
 import {requirePlayerToRevealAnIntegrityCard} from '../integrity_cards';
 import {
-  EquipmentCardConfig,
-  EquipmentCardType,
-  GameState,
-  GameItemType,
-  EquipmentCardResult,
   CardState,
+  EquipmentCardConfig,
+  EquipmentCardResult,
+  EquipmentCardType,
+  GameItemType,
+  GameState,
   Selection,
 } from '../models';
-import {generateId} from '../utils';
+import {generateSelectionId} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -24,7 +24,7 @@ function canPlay(state: GameState, player: number) {
 function play(state: GameState, player: number) {
   const targets = findPlayersWithAtLeastOneFacedownIntegrity(state, player);
   const selection: Selection = {
-    id: generateId(),
+    id: generateSelectionId(state),
     player: player,
     query: {
       type: GameItemType.PLAYER,

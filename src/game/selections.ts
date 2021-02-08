@@ -3,11 +3,10 @@ import {
   handleEquipmentCardSelection,
 } from './equipment';
 import {
-  investigateIntegrityCard,
   investigateSelectedIntegrityCard,
   revealSelectedIntegrityCard,
 } from './integrity_cards';
-import {GameState, GameItem} from './models';
+import {GameItem, GameState} from './models';
 import {getLocalPlayer} from './utils';
 
 export function selectItem(state: GameState, item: GameItem) {
