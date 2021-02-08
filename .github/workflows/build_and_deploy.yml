@@ -26,9 +26,8 @@ jobs:
       - name: verify built output
         run: find build/ -print
 
-      # - name: deploy via FTP
-      #   run: node ftp-deploy
-      #   working-directory: www
-      #   env:
-      #     FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      #     FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      - name: deploy via FTP
+        run: node ftp-deploy
+        env:
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}

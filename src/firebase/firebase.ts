@@ -12,8 +12,6 @@ const FIREBASE_CONFIG = {
   measurementId: 'G-ZZ5XSQG6R0',
 };
 
-const blah = firebase.firestore.FieldValue.serverTimestamp();
-
 firebase.initializeApp(FIREBASE_CONFIG);
 
 firebase.firestore().settings({
