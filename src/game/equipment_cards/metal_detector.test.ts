@@ -60,9 +60,11 @@ test('can be played', () => {
 
   // Select a card from player 1
   selectItem(state, {
-    id: player1.integrityCards[0].id,
-    owner: 1,
-    type: GameItemType.INTEGRITY_CARD,
+    item: {
+      id: player1.integrityCards[0].id,
+      owner: 1,
+      type: GameItemType.INTEGRITY_CARD,
+    },
   });
 
   // Verify visibility granted
@@ -71,9 +73,11 @@ test('can be played', () => {
 
   // Select a card from player 2
   selectItem(state, {
-    id: player2.integrityCards[0].id,
-    owner: 2,
-    type: GameItemType.INTEGRITY_CARD,
+    item: {
+      id: player2.integrityCards[0].id,
+      owner: 2,
+      type: GameItemType.INTEGRITY_CARD,
+    },
   });
 
   // Verify visibility granted

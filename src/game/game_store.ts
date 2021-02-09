@@ -85,7 +85,7 @@ export const gameSlice = createSlice({
       endTurn(state);
     },
     select: (state, action: PayloadAction<GameItem>) => {
-      selectItem(state, action.payload);
+      selectItem(state, {item: action.payload});
     },
     emulatePlayer: (state, action: PayloadAction<number>) => {
       emulatePlayer(state, action.payload);

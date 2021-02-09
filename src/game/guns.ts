@@ -93,6 +93,13 @@ export function fireGun(state: GameState, options: {player: number}): boolean {
 }
 
 /**
+ * Cancels any unresolved gun shot.
+ */
+export function cancelUnresolvedGunShot(state: GameState) {
+  state.shared.turn.unresolvedGunShot = undefined;
+}
+
+/**
  * Resolves an in-progress gun shot.
  */
 export function resolveGunShot(state: GameState) {

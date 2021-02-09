@@ -172,7 +172,7 @@ export enum EquipmentCardType {
   REPORT_AUDIT = 'report_audit',
   METAL_DETECTOR = 'metal_detector',
   COFFEE = 'coffee',
-  SMOKE_GRENADe = 'smoke_grenade',
+  SMOKE_GRENADE = 'smoke_grenade',
   WIRETAP = 'wiretap',
   EVIDENCE_BAG = 'evidence_bag',
   TASER = 'taser',

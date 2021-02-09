@@ -48,7 +48,7 @@ test('can be played', () => {
   expect(shared.selections[0].query.type).toEqual(GameItemType.PLAYER);
 
   // Pick player 1
-  selectItem(state, {id: 1, owner: 1, type: GameItemType.PLAYER});
+  selectItem(state, {item: {id: 1, owner: 1, type: GameItemType.PLAYER}});
 
   const player0 = shared.players[0];
   const player1 = shared.players[1];

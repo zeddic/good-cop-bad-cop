@@ -45,6 +45,14 @@ export function getPlayers(state: GameState) {
 }
 
 /**
+ * Gets a list of all players in the game by turn order
+ * who are still alive.
+ */
+export function getAlivePlayers(state: GameState) {
+  return getPlayers(state).filter(p => !p.dead);
+}
+
+/**
  * Returns true if the player is a KingPin or Agent.
  */
 export function isBoss(player: Player) {

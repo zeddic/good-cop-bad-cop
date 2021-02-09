@@ -152,6 +152,14 @@ export function endTurn(state: GameState) {
     return;
   }
 
+  if (
+    state.shared.selections.length > 0 ||
+    state.shared.turn.unresolvedGunShot !== undefined ||
+    state.shared.turn.unresolvedEquipment !== undefined
+  ) {
+    return;
+  }
+
   // Close any temporarily granted visibility.
   state.shared.visibility = [];
 

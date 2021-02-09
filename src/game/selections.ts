@@ -7,10 +7,26 @@ import {
   revealSelectedIntegrityCard,
 } from './integrity_cards';
 import {GameItem, GameState} from './models';
-import {getLocalPlayer} from './utils';
+import {getLocalPlayer, getPlayer} from './utils';
 
-export function selectItem(state: GameState, item: GameItem) {
-  const player = getLocalPlayer(state)!;
+/**
+ * Has the specified player select an item for any selection
+ * they have pending.
+ *
+ * If player is not supplied, this will default to the local
+ * player.
+ */
+export function selectItem(
+  state: GameState,
+  options: {
+    item: GameItem;
+    player?: number;
+  }
+) {
+  const player =
+    options.player !== undefined
+      ? getPlayer(state, options.player)!
+      : getLocalPlayer(state)!;
   const selections = state.shared.selections;
   const selection = selections.filter(s => s.player === player.id)[0];
 
@@ -18,7 +34,7 @@ export function selectItem(state: GameState, item: GameItem) {
     return;
   }
 
-  selection.selected.push(item);
+  selection.selected.push(options.item);
 
   // Are all items selected?
   if (selection.selected.length < selection.numToSelect) {

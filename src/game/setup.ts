@@ -21,7 +21,7 @@ import {generatePlayerId} from './utils';
 export function createEmptyGame(): GameState {
   return {
     local: {
-      debug: false,
+      debug: true,
     },
     shared: createEmptySharedPreGame(),
   };
@@ -136,19 +136,6 @@ export function updateLocalPlayerName(state: GameState, name: string) {
   }
 }
 
-// /**
-//  * Sets the game id that the player should be joined to.
-//  */
-// export function setGameId(state: GameState, id: string) {
-//   const inExistingGame = state.local.game !== undefined;
-//   const isDifferentGame = inExistingGame && state.local.game !== id;
-//   state.local.game = id;
-
-//   if (isDifferentGame) {
-//     state.shared = createEmptySharedPreGame();
-//   }
-// }
-
 /**
  * Starts the game.
  *
@@ -194,7 +181,7 @@ export function startGame(state: GameState) {
   for (const playerId of playerIds) {
     const player = playersById[playerId]!;
     player.integrityCards = assignments.pop()!;
-    player.equipment = []; // todo, grant everyone one equipment
+    player.equipment = [equipment.pop()!];
   }
 
   // Reset the rest of the game state.
@@ -220,43 +207,32 @@ export function startGame(state: GameState) {
  * It is pre-popualted with the specified number of players.
  */
 export function createDebugGame(numPlayers: number): GameState {
-  const shared = createSharedState(numPlayers);
-
-  return {
-    shared,
-    local: {
-      player: shared.order[0],
-      debug: true,
-    },
-  };
-}
-
-export function createSharedState(numPlayers: number): SharedGameState {
   const players = createDebugPlayers(numPlayers);
+  const state = createEmptyGame();
+  state.local.debug = true;
+  state.local.player = players[0].id;
 
-  return {
-    players: indexPlayersById(players),
-    order: players.map(p => p.id),
-    guns: createGunsForPlayers(numPlayers),
-    equipment: buildEquipmentDeck(),
-    selections: [],
-    visibility: [],
-    turnDirection: TurnDirection.CLOCKWISE,
-    stage: GameStage.PLAYING,
-    turn: {
-      activePlayer: 0,
-      actionsLeft: 1,
-      stage: TurnStage.TAKE_ACTION,
-    },
-  };
+  for (const player of players) {
+    state.shared.players[player.id] = player;
+  }
+
+  startGame(state);
+
+  return state;
 }
 
+/**
+ * Create gun objects appropriate for the number of players.
+ */
 function createGunsForPlayers(numPlayers: number) {
   const num = getNumberOfGunsForPlayers(numPlayers);
   const guns = new Array(num).fill(null).map(createGun);
   return guns;
 }
 
+/**
+ * Returns the number of guns appropriate for a game with this many players.
+ */
 function getNumberOfGunsForPlayers(numPlayers: number) {
   if (numPlayers <= 5) {
     return 2;
@@ -275,6 +251,10 @@ function createGun(): Gun {
   };
 }
 
+/**
+ * Convers a list of Players to a record object of player id to
+ * Player object.
+ */
 function indexPlayersById(players: Player[]): Record<number, Player> {
   const playersById: Record<number, Player> = {};
   for (const player of players) {
@@ -283,14 +263,16 @@ function indexPlayersById(players: Player[]): Record<number, Player> {
   return playersById;
 }
 
+/**
+ * Creates some sample players for debugging.
+ */
 function createDebugPlayers(numPlayers: number) {
-  const assignments = getIntegrityCardAssignments(numPlayers);
   const players: Player[] = [];
   for (let i = 0; i < numPlayers; i++) {
     players.push({
       id: i,
       name: `Player ${i}`,
-      integrityCards: assignments[i],
+      integrityCards: [],
       equipment: [],
       gun: undefined,
       wounds: 0,

@@ -43,7 +43,7 @@ test('can be played', () => {
   expect(shared.selections[0].query.type).toEqual(GameItemType.PLAYER);
 
   // Pick a dead player.
-  selectItem(state, {id: 1, owner: 1, type: GameItemType.PLAYER});
+  selectItem(state, {item: {id: 1, owner: 1, type: GameItemType.PLAYER}});
 
   // Verify you are now asked to pick integrity cards.
   expect(shared.selections.length).toBe(1);
@@ -53,9 +53,11 @@ test('can be played', () => {
   // Pick 1st card
   const cards = state.shared.players[1].integrityCards;
   selectItem(state, {
-    id: cards[0].id,
-    owner: 1,
-    type: GameItemType.INTEGRITY_CARD,
+    item: {
+      id: cards[0].id,
+      owner: 1,
+      type: GameItemType.INTEGRITY_CARD,
+    },
   });
 
   // Verify player is still dead.
@@ -63,9 +65,11 @@ test('can be played', () => {
 
   // Pick 2nd card
   selectItem(state, {
-    id: cards[1].id,
-    owner: 1,
-    type: GameItemType.INTEGRITY_CARD,
+    item: {
+      id: cards[1].id,
+      owner: 1,
+      type: GameItemType.INTEGRITY_CARD,
+    },
   });
 
   // Verify player is alive now
@@ -88,7 +92,9 @@ test('it revives immediately if they only have 1 card', () => {
   playEquipment(state, {player: 0, card: 1});
 
   // Pick a dead player.
-  selectItem(state, {id: 1, owner: 1, type: GameItemType.PLAYER});
+  selectItem(state, {
+    item: {id: 1, owner: 1, type: GameItemType.PLAYER},
+  });
 
   // Verify they are revived now.
   expect(state.shared.players[1].dead).toBe(false);
