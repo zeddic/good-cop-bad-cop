@@ -92,6 +92,10 @@ export const selectEquipment = createSelector(selectShared, s => s.equipment);
 
 export const selectVisibility = createSelector(selectShared, s => s.visibility);
 
+/**
+ * Returns a set of integrity card ids that the local user has
+ * been granted special access to view.
+ */
 export const selectVisibleIntegrityCards = createSelector(
   selectLocalPlayer,
   selectVisibility,
@@ -113,6 +117,31 @@ export const selectVisibleIntegrityCards = createSelector(
     if (localPlayer) {
       for (const card of localPlayer.integrityCards) {
         visible.add(card.id);
+      }
+    }
+
+    return visible;
+  }
+);
+
+/**
+ * Returns a set of integrity card ids that all other players besides
+ * the current one have been granted special access to view.
+ */
+export const selectOthersVisibleIntegrityCards = createSelector(
+  selectLocalPlayer,
+  selectVisibility,
+  (localPlayer, visibility) => {
+    const visible = new Set<number>();
+
+    // Granted visibility
+    for (const view of visibility) {
+      if (view.player !== localPlayer?.id) {
+        for (let item of view.items) {
+          if (item.type === GameItemType.INTEGRITY_CARD) {
+            visible.add(item.id!);
+          }
+        }
       }
     }
 

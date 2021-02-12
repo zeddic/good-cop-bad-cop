@@ -11,6 +11,7 @@ import {
   selectInvestigatableCards,
   selectSelectableItems,
   selectVisibleIntegrityCards,
+  selectOthersVisibleIntegrityCards,
 } from '../game/selectors';
 
 import './IntegrityCard.scss';
@@ -25,6 +26,7 @@ export function IntegrityCard(props: {
 
   const dispatch = useDispatch();
   const visibleCards = useSelector(selectVisibleIntegrityCards);
+  const othersVisibleCards = useSelector(selectOthersVisibleIntegrityCards);
   const investigatable = useSelector(selectInvestigatableCards);
   const selectable = useSelector(selectSelectableItems).integrityCards;
   const activeSelection = useSelector(selectLocalSelection);
@@ -34,6 +36,7 @@ export function IntegrityCard(props: {
   const isClickable = isInvestigatable || isSelectable;
   const isForcedVisible = visibleCards.has(card.id) && !isFaceUp;
   const isVisible = isForcedVisible || isFaceUp;
+  const isVisibleToOther = othersVisibleCards.has(card.id);
 
   const classNames2 = [
     'integrity-card',
@@ -84,6 +87,11 @@ export function IntegrityCard(props: {
       disabled={!isClickable}
       onClick={clicked}
       title={getTooltip()}
-    ></button>
+    >
+      {isVisibleToOther && <div className="visible-chip other"></div>}
+      {!isVisibleToOther && isForcedVisible && (
+        <div className="visible-chip"></div>
+      )}
+    </button>
   );
 }

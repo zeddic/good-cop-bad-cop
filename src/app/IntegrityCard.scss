@@ -2,7 +2,9 @@ $width: 312px / 4;
 $height: 463px / 4;
 
 .integrity-card {
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   width: $width;
   height: $height;
 
@@ -15,6 +17,7 @@ $height: 463px / 4;
   box-sizing: border-box;
   margin: 0 4px 4px 0;
   position: relative;
+
 
   outline-color: rgb(41, 126, 255);
   vertical-align: middle;
@@ -40,21 +43,6 @@ $height: 463px / 4;
     border-color: transparent;
   }
 
-
-  &.forced-visible::after {
-    content: '';
-    position: absolute;
-    background-image: url('assets/visibility.png');
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    opacity: .9;
-    background-repeat: no-repeat;
-    background-position: 50% 50%;
-    background-size: 50px 50px;
-  }
-
   &.clickable.clickable {
     cursor: pointer;
 
@@ -65,6 +53,21 @@ $height: 463px / 4;
 
   &.selectable.selectable {
     border-color: rgb(199, 0, 0);
+  }
+
+  .visible-chip {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    
+    background-image: url('assets/visibility.png');
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: 50px 50px;
+
+    &.other {
+      background-image: url('assets/visibility-other.png');
+    }
   }
 
 }

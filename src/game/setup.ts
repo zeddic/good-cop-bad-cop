@@ -21,7 +21,7 @@ import {generatePlayerId} from './utils';
 export function createEmptyGame(): GameState {
   return {
     local: {
-      debug: false,
+      debug: isLocalhost(),
     },
     shared: createEmptySharedPreGame(),
   };
@@ -386,4 +386,11 @@ function shuffle<T>(input: T[]) {
   }
 
   return input;
+}
+
+/**
+ * Returns true if running on localhost
+ */
+function isLocalhost() {
+  return window.location.hostname === 'localhost';
 }
