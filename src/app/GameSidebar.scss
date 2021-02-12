@@ -1,0 +1,68 @@
+$border: rgb(226, 226, 226);
+
+.GameSidebar {
+  border-right: 1px solid $border;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    border-bottom: 1px solid $border;
+    padding: 8px;
+    font-size: 20px;
+  }
+
+  .actions {
+    border-bottom: 1px solid $border;
+    display: flex; 
+    flex-direction: column;
+    flex: 1 1 300px;
+    margin: 4px 0 4px 0;
+    padding: 8px;
+
+    .summary {
+      flex: 1 1 auto;
+
+      .who-turn {
+        margin: 0 0 8px 0;
+        font-weight: 700;
+      }
+    }
+
+    .btns {
+      flex: 0 0 auto;
+    }
+  }
+
+  .supply {
+    flex: 1 1 180px;
+    margin: 0 0 4px 0;
+    padding: 8px;
+
+    .supply-groups {
+      display: flex;
+      flex-direction: row;
+
+      .guns {
+        flex: 1 1 auto;
+      }
+    }
+  }
+
+  .log {
+    background: #000;
+    color: #fff;
+    flex: 1 1 400px;
+    overflow: auto;
+    padding: 8px;
+  }
+
+  .debug {
+    background: #000;
+    padding: 8px;
+
+    .btn {
+      margin-right: 4px;
+    }
+  }
+}

@@ -50,7 +50,7 @@ export function Player(props: {player: PlayerModel}) {
 
   return (
     <div className={classNames.join(' ')}>
-      <h3>
+      <h2>
         {player.name} {player.dead ? '(Dead)' : ''}
         {canAimAt && (
           <button className="btn" onClick={onAimAtClicked}>
@@ -66,7 +66,7 @@ export function Player(props: {player: PlayerModel}) {
             Select
           </button>
         )}
-      </h3>
+      </h2>
 
       <div className="cards">
         {integrityCards.map((card, idx) => (
