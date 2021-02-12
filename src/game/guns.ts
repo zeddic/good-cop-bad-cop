@@ -1,6 +1,14 @@
-import {getPlayer, getPlayerOrCurrent, isBoss, isKingPin} from './utils';
+import {pickupEquipment, returnPlayersEquipmentToSupply} from './equipment';
+import {logInfo} from './logs';
 import {CardState, GameStage, GameState, Team} from './models';
-import {returnPlayersEquipmentToSupply} from './equipment';
+import {
+  getPlayer,
+  getPlayerOrCurrent,
+  getPlayers,
+  isAgent,
+  isBoss,
+  isKingPin,
+} from './utils';
 
 /**
  * Causes the player to pickup a gun, if available.
@@ -15,6 +23,8 @@ export function pickupGun(state: GameState, options: {player: number}) {
   const gun = state.shared.guns.pop()!;
   delete gun.aimedAt;
   player.gun = gun;
+
+  logInfo(state, `${player.name} picked up a gun`);
 }
 
 /**
@@ -46,6 +56,8 @@ export function aimGun(
   }
 
   player.gun.aimedAt = options.target;
+
+  logInfo(state, `${player.name} aimed at ${target.name}`);
 }
 
 /**
@@ -89,6 +101,7 @@ export function fireGun(state: GameState, options: {player: number}): boolean {
     gun: player.gun.id,
   };
 
+  logInfo(state, `${player.name} shot at ${target.name}!`);
   return true;
 }
 
@@ -113,6 +126,7 @@ export function resolveGunShot(state: GameState) {
   // game somehow got into a bad state, we don't want a permanently
   // unresolved gunshot preventing the game from proceeding.
   const gunShot = turn.unresolvedGunShot;
+  const player = getPlayer(state, gunShot.player)!;
   delete turn.unresolvedGunShot;
 
   // Return the gun to the supply.
@@ -132,19 +146,39 @@ export function resolveGunShot(state: GameState) {
   }
 
   // Wound and/or kill them
+  logInfo(state, `${player.name} shot ${target.name}!`);
   target.wounds++;
   if (isBoss(target) && target.wounds === 1) {
-    // todo: let them pick an equipment
+    const bossType = isAgent(target) ? 'Agent' : 'Kingpin';
+    logInfo(state, `${target.name} was the ${bossType}!`);
+    pickupEquipment(state, {player: target.id});
   } else {
+    logInfo(state, `${target.name} is dead!`);
     target.dead = true;
     returnPlayersGunToSupply(state, target.id);
     returnPlayersEquipmentToSupply(state, target.id);
   }
 
-  // TODO: Mark the winner in game state.
+  // Killed a boss!
   if (isBoss(target) && target.dead) {
+    // End the game.
     state.shared.stage = GameStage.END_GAME;
     state.shared.winner = isKingPin(target) ? Team.GOOD : Team.BAD;
+
+    // Reveal all the cards.
+    const players = getPlayers(state);
+    for (const player of players) {
+      for (const card of player.integrityCards) {
+        card.state = CardState.FACE_UP;
+      }
+      for (const card of player.equipment) {
+        card.state = CardState.FACE_UP;
+      }
+    }
+
+    // Log the details
+    const team = state.shared.winner === Team.GOOD ? 'good cops' : 'bad cops';
+    logInfo(state, `The ${team} win!`);
   }
 }
 

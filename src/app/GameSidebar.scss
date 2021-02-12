@@ -31,6 +31,10 @@ $border: rgb(226, 226, 226);
 
     .btns {
       flex: 0 0 auto;
+      
+      .btn {
+        margin-right: 4px;
+      }
     }
   }
 
@@ -55,6 +59,16 @@ $border: rgb(226, 226, 226);
     flex: 1 1 400px;
     overflow: auto;
     padding: 8px;
+
+    ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      > li {
+        padding: 2px 0;
+      }
+    }
   }
 
   .debug {

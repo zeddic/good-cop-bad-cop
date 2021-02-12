@@ -1,3 +1,4 @@
+import {logInfo} from '../logs';
 import {
   CardState,
   EquipmentCardConfig,
@@ -56,6 +57,12 @@ function onSelect(state: GameState, selection: Selection, task: string) {
 
   grantPlayerVisibilityToOthersCards(state, player, target);
   grantPlayerVisibilityToOthersCards(state, target, player);
+
+  logInfo(
+    state,
+    `${player.name} & ${target.name} looked at each others integrity cards`
+  );
+
   return EquipmentCardResult.DONE;
 }
 
@@ -93,7 +100,7 @@ export const POLYGRAPH: EquipmentCardConfig = {
   type: EquipmentCardType.POLYGRAPH,
   name: 'Polygraph',
   description:
-    'Choose a player and view all of their integrity cards' +
+    'Choose a player and view all of their integrity cards ' +
     'then show them all of your integrity cards.',
   canPlay,
   play,

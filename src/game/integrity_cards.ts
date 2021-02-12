@@ -1,3 +1,4 @@
+import {logInfo} from './logs';
 import {CardState, GameItemType, GameState, Query, Selection} from './models';
 import {findItems} from './queries';
 import {generateSelectionId, generateVisibilityId, getPlayer} from './utils';
@@ -38,6 +39,8 @@ export function investigateIntegrityCard(
       },
     ],
   });
+
+  logInfo(state, `${player.name} investigated ${target.name}`);
 
   return true;
 }
@@ -86,6 +89,8 @@ export function requirePlayerToRevealAnIntegrityCard(
   };
 
   state.shared.selections.push(selection);
+
+  logInfo(state, `${player.name} must reveal an integrity card`);
 }
 
 /**
@@ -103,6 +108,8 @@ export function revealSelectedIntegrityCard(
   if (card.length === 1) {
     card[0].state = CardState.FACE_UP;
   }
+
+  logInfo(state, `${player.name} revealed a ${card[0].type}.`);
 }
 
 /**

@@ -1,4 +1,4 @@
-import {getCurrentPlayer} from './utils';
+import {getCurrentPlayer, getPlayer} from './utils';
 import {
   GameStage,
   GameState,
@@ -13,6 +13,7 @@ import {
   investigateIntegrityCard,
   requirePlayerToRevealAnIntegrityCard,
 } from './integrity_cards';
+import {logInfo} from './logs';
 
 /**
  * Has the current player investigate another player.
@@ -177,6 +178,8 @@ export function endTurn(state: GameState) {
   if (state.local.debug) {
     emulatePlayer(state, nextPlayer);
   }
+
+  logInfo(state, `${getPlayer(state, currentPlayer)!.name} ended their turn.`);
 }
 
 export function emulatePlayer(state: GameState, player: number) {

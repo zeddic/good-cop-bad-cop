@@ -28,6 +28,7 @@ describe('ending turns', () => {
         equipment: [],
         selections: [],
         visibility: [],
+        log: [],
         turnDirection: TurnDirection.CLOCKWISE,
         stage: GameStage.PLAYING,
         turn: {

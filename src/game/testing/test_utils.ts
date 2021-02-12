@@ -75,6 +75,7 @@ export function createBasic4PlayerGame() {
       equipment: [],
       selections: [],
       visibility: [],
+      log: [],
       turnDirection: TurnDirection.CLOCKWISE,
       stage: GameStage.PLAYING,
       turn: {

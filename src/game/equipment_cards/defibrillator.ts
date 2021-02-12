@@ -1,3 +1,4 @@
+import {logInfo} from '../logs';
 import {
   EquipmentCardConfig,
   EquipmentCardResult,
@@ -6,7 +7,12 @@ import {
   GameState,
   Selection,
 } from '../models';
-import {generateSelectionId, getPlayers, removeItemWithId} from '../utils';
+import {
+  generateSelectionId,
+  getPlayer,
+  getPlayers,
+  removeItemWithId,
+} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -18,14 +24,15 @@ function canPlay(state: GameState, player: number) {
 /**
  * Play the card.
  */
-function play(state: GameState, player: number) {
+function play(state: GameState, playerId: number) {
   const players = getPlayers(state);
   const deadPlayers = players.filter(p => p.dead);
   const deadPlayerIds = deadPlayers.map(p => p.id);
+  const player = getPlayer(state, playerId)!;
 
   const selection: Selection = {
     id: generateSelectionId(state),
-    player: player,
+    player: playerId,
     query: {
       type: GameItemType.PLAYER,
       filters: [{type: 'is_player', players: deadPlayerIds}],
@@ -38,6 +45,8 @@ function play(state: GameState, player: number) {
   };
 
   state.shared.selections.push(selection);
+
+  logInfo(state, `${player.name} must select a player to revive`);
   return EquipmentCardResult.IN_PROGRESS;
 }
 
@@ -72,6 +81,8 @@ function revivePlayer(state: GameState, targetPlayerId: number) {
   if (!targetPlayer) return;
   targetPlayer.dead = false;
   targetPlayer.wounds = 0;
+
+  logInfo(state, `${targetPlayer.name} is back in the game!`);
 }
 
 /**

@@ -1,4 +1,5 @@
 import {aimGun, cancelUnresolvedGunShot, fireGun} from '../guns';
+import {logInfo} from '../logs';
 import {
   EquipmentCardConfig,
   EquipmentCardResult,
@@ -7,7 +8,7 @@ import {
   GameState,
   Selection,
 } from '../models';
-import {generateSelectionId, getAlivePlayers} from '../utils';
+import {generateSelectionId, getAlivePlayers, getPlayer} from '../utils';
 
 /**
  * Can this card be played by this player?
@@ -50,6 +51,12 @@ function play(state: GameState, player: number) {
   state.shared.selections.push(selection);
 
   cancelUnresolvedGunShot(state);
+
+  const playerShootingGun = getPlayer(state, personShootingGun)!;
+  logInfo(
+    state,
+    `${playerShootingGun.name} must pick a different player to shoot`
+  );
 
   return EquipmentCardResult.IN_PROGRESS;
 }

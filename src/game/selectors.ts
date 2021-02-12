@@ -19,6 +19,8 @@ export const selectGameId = createSelector(selectLocal, s => s.game);
 
 export const selectStage = createSelector(selectShared, s => s.stage);
 
+export const selectLog = createSelector(selectShared, s => s.log);
+
 /**
  * The player who is playing their turn now.
  */

@@ -30,6 +30,7 @@ export interface SharedGameState {
   selections: Selection[];
   visibility: Visibility[];
   winner?: Team;
+  log: LogEntry[];
 }
 
 /**
@@ -362,4 +363,27 @@ export interface IsPlayer {
 export interface IsFaceDown {
   type: 'is_face_down';
   isFaceDown: boolean;
+}
+
+/**
+ * A game log entry.
+ */
+export interface LogEntry {
+  level: LogLevel;
+  msg: string;
+}
+
+/**
+ * The level of the log message.
+ */
+export enum LogLevel {
+  /**
+   * Everyone in the game should see it.
+   */
+  INFO = 'info',
+
+  /**
+   * Should only be shown while debugging.
+   */
+  DEBUG = 'debug',
 }

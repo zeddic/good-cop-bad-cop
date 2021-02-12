@@ -1,3 +1,4 @@
+import {logInfo} from '../logs';
 import {
   EquipmentCardConfig,
   EquipmentCardResult,
@@ -68,6 +69,8 @@ function onSelect(state: GameState, selection: Selection, task: string) {
 
   owner.gun = undefined;
   newOwner.gun = gun;
+
+  logInfo(state, `${newOwner.name} stole ${owner}'s gun`);
 
   finishActionStage(state);
 

@@ -70,6 +70,7 @@ describe('shooting players', () => {
         equipment: [],
         selections: [],
         visibility: [],
+        log: [],
         turnDirection: TurnDirection.CLOCKWISE,
         stage: GameStage.PLAYING,
         turn: {

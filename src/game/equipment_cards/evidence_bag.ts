@@ -1,4 +1,5 @@
 import {checkIfPlayerHasTooManyEquipmentCards} from '../equipment';
+import {logInfo} from '../logs';
 import {
   EquipmentCardConfig,
   EquipmentCardResult,
@@ -61,6 +62,7 @@ function onSelect(state: GameState, selection: Selection, task: string) {
     checkIfPlayerHasTooManyEquipmentCards(state, {player: player.id});
   }
 
+  logInfo(state, `${player.name} stole equipment from ${target.name}!`);
   return EquipmentCardResult.DONE;
 }
 

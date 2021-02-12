@@ -39,6 +39,7 @@ export function createEmptySharedPreGame(): SharedGameState {
     equipment: [],
     selections: [],
     visibility: [],
+    log: [],
     turnDirection: TurnDirection.CLOCKWISE,
     stage: GameStage.PRE_GAME,
     turn: {

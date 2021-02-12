@@ -29,6 +29,18 @@ h2 {
   color: #343633;
 }
 
+::-webkit-scrollbar {
+  width: 4px;
+  overflow-y: scroll;
+  background: grey;
+  box-shadow: inset 0 0 4px rgba(112, 112, 112, 0.479);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #474747bb;
+  border-radius: 10px;
+}
+
 .btn {
   background: #058ED9;
   border: none;

@@ -1,4 +1,4 @@
-import React, {ChangeEvent} from 'react';
+import React, {ChangeEvent, useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {gameSlice} from '../game/game_store';
 import {GameStage, Team} from '../game/models';
@@ -14,6 +14,7 @@ import {
   selectGunSupply,
   selectIsLocalPlayersTurn,
   selectLocalPlayer,
+  selectLog,
   selectPlayers,
   selectStage,
   selectTurn,
@@ -41,8 +42,14 @@ function GameSidebar(props: {className?: string}) {
   const winner = useSelector(selectWinner);
   const debug = useSelector(selectDebug);
   const stage = useSelector(selectStage);
+  const log = useSelector(selectLog);
   const unresolvedShot = turn.unresolvedGunShot;
+  const logEndRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({behavior: 'smooth'});
+  }, [log]);
 
   function endTurn() {
     dispatch(gameSlice.actions.endTurn());
@@ -168,7 +175,14 @@ function GameSidebar(props: {className?: string}) {
         </div>
       </div>
 
-      <div className="log">Log goes here</div>
+      <div className="log">
+        <ol>
+          {log.map((entry, i) => (
+            <li key={i}>{entry.msg}</li>
+          ))}
+          <div ref={logEndRef}></div>
+        </ol>
+      </div>
 
       <div className="debug">
         <button className="btn" onClick={resetGame}>

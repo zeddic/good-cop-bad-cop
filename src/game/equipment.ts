@@ -1,4 +1,5 @@
 import {getEquipmentConfig} from './equipment_config';
+import {logInfo} from './logs';
 import {
   CardState,
   EquipmentCard,
@@ -28,6 +29,8 @@ export function pickupEquipment(state: GameState, options: {player: number}) {
   const card = supply.pop()!;
   player.equipment.push(card);
   checkIfPlayerHasTooManyEquipmentCards(state, {player: player.id});
+
+  logInfo(state, `${player.name} picked up an equipment card`);
 }
 
 /**
@@ -72,6 +75,9 @@ export function discardSelectedEquipmentCard(
 
   // Add it back to the supply.
   addEquipmentToSupply(state, card);
+
+  const config = getEquipmentConfig(card.type);
+  logInfo(state, `${player.name} discarded ${config?.name}`);
 }
 
 /**
@@ -115,6 +121,8 @@ export function playEquipment(
 
   // Play!
   const result = config.play(state, player.id);
+
+  logInfo(state, `${player.name} played ${config.name}: ${config.description}`);
 
   // Some cards (rarely) can be resolved immediately after being played.
   // If so, mark it as resolved.
